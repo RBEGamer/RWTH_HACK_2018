@@ -82,8 +82,7 @@
         border-radius: 0;
         border-top: 1px rgba(0,0,0,.5) solid;
         overflow-y: auto;
-        background-color: #222;
-        /*background-color: #5A6B7D;*/
+        background-color: #1C225A;
         bottom: 0;
         overflow-x: hidden;
         padding-bottom: 40px;
@@ -140,4 +139,34 @@
 
 .navbar-brand {
     padding: 5px 15px;
+}
+
+.ticket-list .panel-heading {
+    background-color:#F4F8F9;
+    border-bottom: none;
+    overflow-x: auto
+}
+
+
+.ticket-list .panel-body {
+    background-color:#F4F8F9;
+    table-layout:fixed;
+    overflow-x: auto
+}
+
+.ticket-list .table-head{
+  border: none;  
+  background: #FFA500;
+  padding: 30px;
+  color: #fff;
+  overflow-x: auto
+}
+
+.td {
+  word-wrap:break-word;
+  word-break:break-all;
+}
+
+.block_box {
+    height: 150px;
 }
