@@ -4,13 +4,26 @@
 function update_recent_table(){
   $.getJSON( "http://127.0.0.1:5000/api/tickets/list", function( data ) {
     if(data == null || data == undefined){console.log("data empty");return;}
+if(data.length <= 0){return;}
+
+
     app.recent_ticket_tems = data
   var sv = 0;
   
     for (i = 0; i < data.length; i++) { 
+
+//1 -> eye blue
+//2 -> pencil yellow
+//3 -> avatar green
+      data.collab_action = [
+        {action:1,desc:"Marcel"},
+        {action:2,desc:"Marcel"},
+        {action:3,desc:"Marcel"}, 
+      ];
     if(data[i].state != undefined && data[i].state == "Done"){
       sv++;
-      console.log(data.length);
+      console.log(data.collab_action);
+      
     }
     
   }
