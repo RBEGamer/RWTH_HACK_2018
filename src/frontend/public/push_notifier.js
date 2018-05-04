@@ -28,8 +28,7 @@ function formatAMPM(date) {
 
 
 
-
-$(function () {
+function start_push_nofifier(){
     socket = io();
     
     //send register message with device timestamp
@@ -43,7 +42,9 @@ $(function () {
         });
       })
     //request push permission
-    Push.Permission.request(function (){console.log("push permission ok")}, function (){alert("For live status updates. Please allow browser notifications.")});
+    Push.Permission.request(function (){console.log("push permission ok")}, function (){
+        console.log("For live status updates. Please allow browser notifications.");
+    });
     
 
     socket.on('message', function (data) {
@@ -77,4 +78,4 @@ $(function () {
         
        }
       });
-});
+};
