@@ -20,7 +20,10 @@ create table tickets (
   created_by text not null,
   tags text not null,
   real_time_state text not null,
-  total_users_looking int not null
+  users_looking text not null,
+  total_users_looking int not null,
+  users_editing text not null,
+  total_users_editing int not null
 );
 drop table if exists interactions;
 create table interactions (
@@ -81,7 +84,7 @@ def add_mock_data():
     db = get_db()
     list_mock, interaction_mock = gen_mock_data(7)
     for l_mock in list_mock:
-        cur = db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags, real_time_state, total_users_looking) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', l_mock)
+        cur = db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags, real_time_state, users_looking, total_users_looking, users_editing, total_users_editing) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', l_mock)
     for i_mock in interaction_mock:
         db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', i_mock)    
     db.commit()
@@ -112,7 +115,10 @@ def gen_mock_data(num_data):
         for num_realtime in range(random.randint(0, len(staffs))):
             staff_edit = random.choice(staffs)
             real_time_state[staff_edit] = (created_at + (last_updated - created_at) * random.random()).strftime("%Y-%m-%d")
-        total_looking = len(real_time_state)
+        users_looking = random.sample(real_time_state.keys(), random.randint(0, len(real_time_state)))
+        total_looking = len(users_looking)
+        users_editing = random.sample(users_looking, random.randint(0, total_looking))
+        total_editing = len(users_editing)
         list_mock.append([this_title, 
                     this_state,  
                     created_at,              
@@ -120,7 +126,10 @@ def gen_mock_data(num_data):
                     created_by, 
                     this_tag,
                     json.dumps(real_time_state),
-                    total_looking
+                    json.dumps(users_looking),
+                    total_looking,
+                    json.dumps(users_editing),
+                    total_editing
                     ])
         if this_state == 'Open':
             num_inter = 1
