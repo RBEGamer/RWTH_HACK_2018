@@ -3,7 +3,7 @@ from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash, jsonify
 import flask
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room, leave_room
 import json
 
 SQL_SCHEMA = '''
@@ -146,13 +146,22 @@ def create_interaction(ticket_id):
     db.commit()
     return jsonify({'result': 'ok', 'id': cur.lastrowid})
 
-@socketio.on('ticket-opened')
-def ticket_opened():
+@socketio.on('connected')
+def user_connected():
+    
     pass
+
+@socketio.on('ticket-opened')
+def ticket_opened(data):
+    room = 'ticket:{}'.format(data['id'])
+    send(json.dumps({'msg': 'Opened by: ' + data['user_name']}), room=room)
+    join_room(room)
 
 @socketio.on('ticket-closed')
 def ticket_closed():
-    pass
+    room = 'ticket:{}'.format(data['id'])
+    leave_room(room)
+    send(json.dumps({'msg': 'Closed by: ' + data['user_name']}), room=room)
 
 @socketio.on('ticket-editing')
 def ticket_editing():
@@ -161,6 +170,4 @@ def ticket_editing():
 @socketio.on('ticket-edited')
 def ticket_edited():
     pass
-
-
 
