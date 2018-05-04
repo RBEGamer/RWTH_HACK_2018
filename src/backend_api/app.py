@@ -312,24 +312,24 @@ def update_in_realtime_data(ticket, user):
     curtime = datetime.datetime.now()    
     if curtime - data[user] >= TIMEOUT_SECONDS:
         del data[user]
-    else:
-        data[user] = curtime
-    return jsonify(data)
+    return data
         
 def include_in_realtime_data(ticket, user):
     # add the user with the current timestamp to the object
     db = get_db()
+    ticket = dict(db.execute('select * from tickets where id=?', ticket).fetchone())
     data = update_in_realtime_data(ticket, user)
     data[user] = datetime.datetime.now()
-    db.execute('update tickets (real_time_state) VALUES (?) where id=?', [json.dumps(data), ticket.id])
+    db.execute('update tickets (real_time_state) VALUES (?) where id=?', [json.dumps(data), ticket['id']])
     
 def remove_in_realtime_data(ticket, user):
     # remove the user with the current timestamp to the object
     db = get_db()
+    ticket = dict(db.execute('select * from tickets where id=?', ticket).fetchone())
     data = update_in_realtime_data(ticket, user)
     if user in data:
         del data[user]
-    db.execute('insert into tickets (real_time_state) VALUES (?), data)
+    db.execute('update tickets (real_time_state) VALUES (?) where id=?', [json.dumps(data), ticket['id']])
     
 @socketio.on('ticket-opened')
 def ticket_opened(data):
