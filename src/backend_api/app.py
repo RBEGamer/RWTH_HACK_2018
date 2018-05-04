@@ -86,11 +86,19 @@ def close_db(error):
 
 @app.route('/static/<path:path>')
 def send_static(path):
-    return flask.send_from_directory('../frontend', path)
+    return flask.send_from_directory('../frontend/public', path)
+
+@app.route('/<name>.js')
+def send_static_js(name):
+    return flask.send_from_directory('../frontend/public', name + '.js')
+
+@app.route('/<name>.css')
+def send_static_css(name):
+    return flask.send_from_directory('../frontend/public', name + '.css')
 
 @app.route('/')
 def show_spa():
-    return flask.send_from_directory('../frontend', 'index.html')
+    return flask.send_from_directory('../frontend/public', 'index.html')
 
 # TODO: Allow sorting, filtering and pagination
 @app.route('/api/tickets/list')
