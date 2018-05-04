@@ -44,13 +44,13 @@ $(function () {
       })
     //request push permission
     Push.Permission.request(function (){console.log("push permission ok")}, function (){alert("For live status updates. Please allow browser notifications.")});
-
+    
 
     socket.on('message', function (data) {
-       console.log(data);
+     
 
-
-       if(data.event_type == "push"){
+        //show push meesage if enabeld
+       if(data.event_type == "push" && Push.Permission.has()){
            if(data.payload.header == undefined){
                data.payload.header = "-- T2Ticket --";
            }
