@@ -5,6 +5,7 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
 import flask
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import json
+from flask_bcrypt import Bcrypt
 
 SQL_SCHEMA = '''
 drop table if exists tickets;
@@ -29,17 +30,21 @@ create table interactions (
 );
 drop table if exists agents;
 create table agents (
-  id integer primary key autoincrement
+  id integer primary key autoincrement,
+  is_admin integer not null,
+  name text not null,
+  email text not null,
+  password text not null
 );
 '''
 
-# TODO: User management
-# TODO: 
+# TODO: User permissions, not included for development
 
 
 # create our little application :)
 app = Flask(__name__)
 socketio = SocketIO(app)
+bcrypt = Bcrypt(app)
 
 def connect_db():
     """Connects to the specific database."""
@@ -53,6 +58,13 @@ def init_db():
     """Initializes the database."""
     db = get_db()
     db.cursor().executescript(SQL_SCHEMA)
+    db.commit()
+
+def add_standard_agents():
+    db = get_db()
+    db.execute('insert into agents (is_admin, name, email, password) VALUES (0, "System", "system@system", "")')
+    db.execute('insert into agents (is_admin, name, email, password) VALUES (1, "Admin", "admin@admin", ?)', [bcrypt.generate_password_hash('hunter2')])
+    db.execute('insert into agents (is_admin, name, email, password) VALUES (0, "Default Agent", "default@agent", ?)', [bcrypt.generate_password_hash('hunter2')])
     db.commit()
 
 def add_mock_data():
@@ -93,6 +105,7 @@ def initdb_command():
     """Creates the database tables."""
     init_db()
     add_mock_data()
+    add_standard_agents()
     print('Initialized the database.')
 
 
@@ -149,7 +162,7 @@ def show_ticket(ticket_id):
     cur_ticket = db.execute('select * from tickets where id=?', [ticket_id])
     ticket = cur_ticket.fetchone()
     ticket = dict(ticket)
-    cur_interactions = db.execute('select * from interactions where ticket_id=?', [ticket_id])
+    cur_interactions = db.execute('select * from interactions where ticket_id=? order by date ASC', [ticket_id])
     interactions = cur_interactions.fetchall()
     interactions = list(map(dict, cur_interactions))
     ticket['interactions'] = interactions
@@ -173,8 +186,51 @@ def create_interaction(ticket_id):
     db.commit()
     return jsonify({'result': 'ok', 'id': cur.lastrowid})
 
+@app.route('/api/agents/create', methods=['POST'])
+def create_agent():
+    db = get_db()
+    agent = request.json
+    cur = db.execute('insert agents (is_admin, name, email, password) VALUES (?, ?, ?, ?)', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password'])])
+    return jsonify({'result': 'ok', 'id': cur.lastrowid})
+
+@app.route('/api/agents/<int:agent_id>/update')
+def update_agent(agent_id):
+    db = get_db()
+    agent = request.json
+    if agent_id != agent.id:
+      return jsonify({'result': 'fail', 'error': 'Agent ID mismatch'})
+    db.execute('update agents (is_admin, name, email, password) VALUES (?, ?, ?, ?) WHERE id=?', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password']), agent_id])
+    return jsonify({'result': 'ok'})
+
+@app.route('/api/agents/list')
+def list_agent():
+    db = get_db()
+    cur = db.execute('select * from agents')
+    agents = list(map(dict, cur.fetchall()))
+    return jsonify(agents)
+
+@app.route('/api/login', methods=['POST'])
+def login_agent():
+    db = get_db()
+    cur = db.execute('select * from agents where email=?', request.form['email'])
+    user = cur.fetchone()
+    if user is None:
+        return jsonify({'result': 'fail'})
+    if bcrypt.check_password_hash(user['password'], request.form['password']):
+        session['id'] = user['id']
+        session['is_admin'] = user['is_admin']
+        return jsonify({'result': 'ok', 'is_admin': user['is_admin']})
+    return jsonify({'result': 'fail'})
+
+@app.route('/api/logout', methods=['POST'])
+def logout_agent():
+    # Security: This does not prevent replay attacks
+    session.clear()
+    return jsonify({'result': 'ok'})
+
 @socketio.on('connected')
 def user_connected():
+    send(json.dumps({'msg': 'Hello!'}))
     pass
 
 @socketio.on('ticket-opened')
