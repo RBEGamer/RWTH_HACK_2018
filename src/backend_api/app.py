@@ -18,7 +18,8 @@ create table tickets (
   last_updated text not null,
   created_by text not null,
   tags text not null,
-  real_time_state text not null
+  real_time_state text not null,
+  total_users_looking int not null
 );
 drop table if exists interactions;
 create table interactions (
@@ -73,12 +74,11 @@ def add_mock_data():
     db = get_db()
     list_mock, interaction_mock = gen_mock_data(7)
     for l_mock in list_mock:
-        cur = db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags) VALUES (?, ?, ?, ?, ?, ?)', l_mock)
+        cur = db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags, real_time_state, total_users_looking) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', l_mock)
     for i_mock in interaction_mock:
         db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', i_mock)    
     db.commit()
     
-   
     
 def gen_mock_data(num_data):
     '''
@@ -90,7 +90,7 @@ def gen_mock_data(num_data):
     states = ['Open', 'Progress', 'WaitClient', 'Done']
     staffs = ['Nikolas', 'Newton', 'Einstein', 'MickyMouse']
     clients = ['Sarah', 'Curie', 'MinnieMouse']
-    tags = []
+    tags = ['IT', 'sales', 'return', 'order', 'tracking', 'etc']
     list_mock = []
     interaction_mock = []
     for ticket in range(num_data):
@@ -99,12 +99,21 @@ def gen_mock_data(num_data):
         created_at = datetime.date(randint(2005,2017), randint(1,12),randint(1,28))
         last_updated = created_at + datetime.timedelta(randint(1,365))
         created_by = random.choice(staffs)
+        this_tag = random.choice(tags)
+        # define real_time_state
+        real_time_state = {}
+        for num_realtime in range(random.randint(0, len(staffs))):
+            staff_edit = random.choice(staffs)
+            real_time_state[staff_edit] = (created_at + (last_updated - created_at) * random.random()).strftime("%Y-%m-%d")
+        total_looking = len(real_time_state)
         list_mock.append([this_title, 
                     this_state,  
                     created_at,              
                     last_updated, 
                     created_by, 
-                    '' # tags
+                    this_tag,
+                    json.dumps(real_time_state),
+                    total_looking
                     ])
         if this_state == 'Open':
             num_inter = 1
@@ -135,7 +144,8 @@ def gen_mock_data(num_data):
                 inter_type = 'ours'
             else:
                 inter_type = 'theirs'
-            inter_type = ''
+            
+            random.randint
             interaction_mock.append([ticket+1,
                                      sender, 
                                     receiver, 
