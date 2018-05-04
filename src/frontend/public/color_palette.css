@@ -25,6 +25,24 @@
 .color-secondary-2-3 { color: #51041A }
 .color-secondary-2-4 { color: #30000E }
 
+.color-primary-0bg { background: #1C225A }	/* Main Primary color */
+.color-primary-1bg { background: #565C93 }
+.color-primary-2bg { background: #333A75 }
+.color-primary-3bg { background: #0B103E }
+.color-primary-4bg { background: #030725 }
+
+.color-secondary-1-0bg { background: #4F7718 }	/* Main Secondary color (1) */
+.color-secondary-1-1bg { background: #9CC366 }
+.color-secondary-1-2bg { background: #719B37 }
+.color-secondary-1-3bg { background: #315304 }
+.color-secondary-1-4bg { background: #1C3100 }
+
+.color-secondary-2-0bg { background: #751832 }	/* Main Secondary color (2) */
+.color-secondary-2-1bg { background: #BF647E }
+.color-secondary-2-2bg { background: #993652 }
+.color-secondary-2-3bg { background: #51041A }
+.color-secondary-2-4bg { background: #30000E }
+
 
 
 /* As RGBa codes */
