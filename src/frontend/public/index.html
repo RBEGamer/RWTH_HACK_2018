@@ -1,11 +1,22 @@
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-<script src="./dash_main.js"></script>
-<link href="./dash_main.css" rel="stylesheet">
+<html>
+<head>
 
+
+
+    <!-- MAIN CSS INCLUDE -->
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+
+<link href="./dash_main.css" rel="stylesheet">
 <link href="./color_palette.css" rel="stylesheet">
 
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+
+</head>
+
+
+<body>
 <div id="throbber" style="display:none; min-height:120px;"></div>
 <div id="noty-holder"></div>
 <div id="wrapper">
@@ -20,7 +31,7 @@
                 <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="http://cijulenlinea.ucr.ac.cr/dev-users/">
-                <img src="http://placehold.it/200x50&text=LOGO" alt="LOGO"">
+                <img src="http://placehold.it/200x50text=LOGO" alt="LOGO">
             </a>
         </div>
         <!-- Top Menu Items -->
@@ -38,7 +49,7 @@
                 </ul>
             </li>
         </ul>
-        <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+      
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav side-nav">
                 <li>
@@ -84,4 +95,23 @@
         <!-- /.container-fluid -->
     </div>
     <!-- /#page-wrapper -->
-</div><!-- /#wrapper -->
+</div>
+
+
+
+
+<!-- MAIN JS INCLUDE -->
+<script src="./bower_components/jquery/dist/jquery.min.js"></script>
+<script src="./bower_components/jquery-ui/jquery-ui.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+<script src="./dash_main.js"></script>
+
+<script src="./bower_components/push.js/bin/push.min.js"></script>
+<script src="./bower_components/socket.io-client/dist/socket.io.js"></script>
+<!--<script src="./push_notifier.js"></script>-->
+
+
+
+</body>
+</html>
