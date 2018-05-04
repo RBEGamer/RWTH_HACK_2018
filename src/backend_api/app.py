@@ -236,8 +236,8 @@ def list_interactions():
     return jsonify(interaction)
 
 @app.route('/api/agents/create', methods=['POST'])
-def_agent():
-    db create = get_db()
+def def_agent():
+    db = get_db()
     agent = request.json
     cur = db.execute('insert agents (is_admin, name, email, password) VALUES (?, ?, ?, ?)', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password'])])
     return jsonify({'result': 'ok', 'id': cur.lastrowid})
