@@ -175,7 +175,6 @@ def create_interaction(ticket_id):
 
 @socketio.on('connected')
 def user_connected():
-    
     pass
 
 @socketio.on('ticket-opened')
@@ -185,16 +184,17 @@ def ticket_opened(data):
     join_room(room)
 
 @socketio.on('ticket-closed')
-def ticket_closed():
+def ticket_closed(data):
     room = 'ticket:{}'.format(data['id'])
     leave_room(room)
     send(json.dumps({'msg': 'Closed by: ' + data['user_name']}), room=room)
 
 @socketio.on('ticket-editing')
-def ticket_editing():
-    pass
+def ticket_editing(data):
+    room = 'ticket:{}'.format(data['id'])
+    send(json.dumps({'msg': 'Editing by: ' + data['user_name']}), room=room)
 
-@socketio.on('ticket-edited')
-def ticket_edited():
-    pass
-
+@socketio.on('ticket-changed')
+def ticket_changed(data):
+    room = 'ticket:{}'.format(data['id'])
+    send(json.dumps({'msg': 'Changed by: ' + data['user_name']}), room=room)
