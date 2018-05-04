@@ -24,7 +24,7 @@
                <span class="icon-bar"></span>
                </button>
                <a class="navbar-brand" href="http://cijulenlinea.ucr.ac.cr/dev-users/">
-               <img src="http://placehold.it/200x50text=LOGO" alt="LOGO">
+               <img src="/img/icons/ticket_logo.png" width="30%" alt="LOGO">
                </a>
             </div>
             <!-- Top Menu Items -->
@@ -72,157 +72,151 @@
                </ul>
             </div>
             <!-- /.navbar-collapse -->
-
-
          </nav>
          <div id="page-wrapper">
             <div class="container-fluid">
                <!-- Page Heading -->
-
-
-               
-               <script src="./bower_components/vue/dist/vue.js"></script>
+               <script src="https://unpkg.com/vue"></script>
                <div id="app">
-
-           
-               <div class="row" id="main" >
-                  <div class="col-md-12 well" id="content">
-                     <div class="container">
-                        <div class="row">
-                           <div class=" col-md-3">
-                              <div class="color-primary-1bg block_box">
-                                 <i></i>
-                                 <h2>All Tickets ( {{ all_ticket_count }} )</h2>
-                              </div>
-                           </div>
-                           <div class="col-md-3">
-                              <div class="color-secondary-1-1bg block_box">
-                                 <i></i>
-                                 <h2>Solved Ticket</h2>
-                              </div>
-                           </div>
-                           <div class="col-md-3">
-                              <div class="color-secondary-2-1bg block_box">
-                                 <i></i>
-                                 <h2>Pending Ticket</h2>
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                     <!-- table -->
-                     <div class="container">
-                        <div class="row">
-                           <div class="col-md-9">
-                              <div class="panel panel-default ticket-list">
-                                 <div class="panel-heading">
-                                    <h3 class="panel-title text-center">Recent Tickets</h3>
+                  <div class="row" id="main" >
+                     <div class="col-md-12 well" id="content">
+                        <div class="container">
+                           <div class="row">
+                              <div class=" col-md-3">
+                                 <div class="color-primary-1bg block_box">
+                                    <i></i>
+                                    <h2>
+                                       <p class="text-center">All Tickets</p>
+                                    </h2>
+                                    <h2>
+                                       <p class="text-center color-swhite">{{ all_ticket_count }}</p>
+                                    </h2>
                                  </div>
-                                 <div class="panel-body ">
-                                    <table class="table td">
-                                       <thead class='table-head td'>
-                                          <tr class='table-head td'>
-                                             <th>TICKET ID</th>
-                                             <th>TICKET TITLE</th>
-                                             <th>DEPARTMENT</th>
-                                             <th>DATE</th>
-                                             <th>CLIENT</th>
-                                             <th>Last Action</th>
-                                             <th>STATUS</th>
-                                          </tr>
-                                       </thead>
-                                       <tbody>
-                                          <tr>
-                                             <th>#001</th>
-                                             <th>Problem</th>
-                                             <th>IT</th>
-                                             <th>01-04-2018</th>
-                                             <th>John</th>
-                                             <th class = "color-secondary-1-0">Answered</th>
-                                             <th class = "color-secondary-1-0">Open</th>
-                                          </tr>
-                                          <tr>
-                                             <th>#002</th>
-                                             <th>Problem</th>
-                                             <th>Service</th>
-                                             <th>05-04-2018</th>
-                                             <th>Peter</th>
-                                             <th class = "color-primary-0">Not Answered</th>
-                                             <th class  = "color-secondary-2-0">Closed</th>
-                                          </tr>
-                                          <tr>
-                                             <th>#003</th>
-                                             <th>Problem</th>
-                                             <th>IT</th>
-                                             <th>09-04-2018</th>
-                                             <th>Dennis</th>
-                                             <th class = "color-secondary-1-0">Answered</th>
-                                             <th class = "color-secondary-2-0">Closed</th>
-                                          </tr>
-                                       </tbody>
-                                    </table>
+                              </div>
+                              <div class="col-md-3">
+                                 <div class="color-secondary-1-1bg block_box">
+                                    <i></i>
+                                    <h2>
+                                       <p class="text-center">Solved Tickets</p>
+                                    </h2>
+                                    <h2>
+                                       <p class="text-center color-swhite">{{ solved_ticket_count }}</p>
+                                    </h2>
+                                 </div>
+                              </div>
+                              <div class="col-md-3">
+                                 <div class="color-secondary-2-1bg block_box">
+                                    <i></i>
+                                    <h2>
+                                       <p class="text-center">Pending Tickets</p>
+                                    </h2>
+                                    <h2>
+                                       <p class="text-center color-swhite">{{ pending_ticket_count }}</p>
+                                    </h2>
                                  </div>
                               </div>
                            </div>
                         </div>
-                     </div>
-                     <!-- table -->
-                     <div class="container">
-                        <div class="row">
-                           <div class="col-md-4">
-                              <div class="panel panel-default client-list">
-                                 <div class="panel-heading">
-                                    <h3 class="panel-title text-center">New Clients</h3>
-                                 </div>
-                                 <div class="panel-body ">
-                                    <table class="table">
-                                       <thead class='table-head'>
-                                          <tr class='table-head'>
-                                             <th>NEW CLIENT</th>
-                                          </tr>
-                                       </thead>
-                                       <tbody>
-                                          <tr>
-                                          <tr>
-                                             <td>John</td>
-                                          </tr>
-                                          <td>Mary</td>
-                                          </tr>
-                                          <tr>
-                                             <td>July</td>
-                                          </tr>
-                                       </tbody>
-                                    </table>
-                                 </div>
-                              </div>
-                           </div>
-                           <div class="col-md-5">
-                              <div class="panel panel-default ticket-list">
-                                 <div class="panel-heading">
-                                    <h3 class="panel-title text-center">Stuff Status</h3>
-                                 </div>
-                                 <div class="panel-body ">
-                                    <table class="table">
-                                       <thead class='table-head'>
-                                          <tr class='table-head'>
-                                             <th>STUFF</th>
-                                          </tr>
-                                       </thead>
-                                       <tbody>
-                                          <tr>
-                                             <td>John</td>
-                                          </tr>
-                                          <tr>
-                                             <td>Mary</td>
-                                          </tr>
-                                          <tr>
-                                             <td>July</td>
-                                          </tr>
-                                       </tbody>
-                                    </table>
+                        <!-- table -->
+                        <div class="container">
+                           <div class="row">
+                              <div class="col-md-9">
+                                 <div class="panel panel-default ticket-list">
+                                    <div class="panel-heading">
+                                       <h3 class="panel-title text-center">Recent Tickets</h3>
+                                    </div>
+                                    <div class="panel-body ">
+                                       <table class="table td">
+                                          <thead class='table-head td'>
+                                             <tr>
+                                                <th>TICKET ID</th>
+                                                <th>TICKET TITLE</th>
+                                                <th>DEPARTMENT</th>
+                                                <th>DATE</th>
+                                                <th>CLIENT</th>
+                                                <th>LAST ACTION</th>
+                                                <th>STATUS</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <template  v-for="item in items">
+                                                <tr>
+                                                   <th>{{item.TICKET_ID}}</th>
+                                                   <th>{{item.TICKET_TITLE}}</th>
+                                                   <th>{{item.DEPARTMENT}}</th>
+                                                   <th>{{item.DATE}}</th>
+                                                   <th>{{item.CLIENT}}</th>
+                                                   <th>{{item.LAST_ACTION}}</th>
+                                                   <th>{{item.STATUS}}</th>
+                                                </tr>
+                                             </template>
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
                                  </div>
                               </div>
                            </div>
                         </div>
+                        <!-- table -->
+                        <div class="container">
+                           <div class="row">
+                              <div class="col-md-4">
+                                 <div class="panel panel-default client-list">
+                                    <div class="panel-heading">
+                                       <h3 class="panel-title text-center">New Clients</h3>
+                                    </div>
+                                    <div class="panel-body ">
+                                       <table class="table">
+                                          <thead class='table-head'>
+                                             <tr class='table-head'>
+                                                <th>NEW CLIENT</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                             <tr>
+                                                <td>John</td>
+                                             </tr>
+                                             <tr>
+                                                <td>Mary</td>
+                                             </tr>
+                                             <tr>
+                                                <td>July</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="col-md-5">
+                                 <div class="panel panel-default ticket-list">
+                                    <div class="panel-heading">
+                                       <h3 class="panel-title text-center">Stuff Status</h3>
+                                    </div>
+                                    <div class="panel-body ">
+                                       <table class="table">
+                                          <thead class='table-head td'>
+                                             <tr>
+                                                <th>STUFF ID</th>
+                                                <th>TICKET ID</th>
+                                                <th>STATUS</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <template  v-for="person in stuff">
+                                                <tr>
+                                                   <th>{{person.STUFF_ID}}</th>
+                                                   <th>{{person.TICKET_ID}}</th>
+                                                   <th>{{person.STATUS}}</th>
+                                                </tr>
+                                             </template>
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
                         </div>
                         <div class="container">
                            <div class="row">
@@ -240,15 +234,13 @@
                                           </thead>
                                     </div>
                                     <tbody>
+                                    <template  v-for="person in stuff">
                                     <tr>
-                                    <td>John</td>
+                                    <th>{{person.STUFF_ID}}</th>
+                                    <th>{{person.TICKET_ID}}</th>
+                                    <th>{{person.STATUS}}</th>
                                     </tr>
-                                    <tr>
-                                    <td>Mary</td>
-                                    </tr>
-                                    <tr>
-                                    <td>July</td>
-                                    </tr>
+                                    </template>
                                     </tbody>
                                     </table>
                                  </div>
@@ -260,43 +252,20 @@
                </div>
                <!-- /.row -->
             </div>
-
-
-
-
-
-
-
-</div>
-
-
             <!-- /.container-fluid -->
          </div>
-         <!-- /#page-wrapper -->
+      </div>
+      <!-- /#page-wrapper -->
       </div>
       <!-- MAIN JS INCLUDE -->
       <script src="./bower_components/jquery/dist/jquery.min.js"></script>
       <script src="./bower_components/jquery-ui/jquery-ui.min.js"></script>
       <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
       <script src="./dash_main.js"></script>
-      <script src="./bower_components/fingerprintjs2/dist/fingerprint2.min.js"></script>
+      <script src="./vue_main.js"></script>
       <script src="./bower_components/push.js/bin/push.min.js"></script>
       <script src="./bower_components/socket.io-client/dist/socket.io.js"></script>
-      <script src="./push_notifier.js"></script>
-
-
-
-      
-      <script type="text/javascript"> 
-      new Vue({
-        el: '#app',
-        data: {
-            all_ticket_count: 1
-        }
-      })
-    </script>
-
-
+      <!--<script src="./push_notifier.js"></script>-->
    </body>
 </html>
 
