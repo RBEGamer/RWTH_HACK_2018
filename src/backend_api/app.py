@@ -57,9 +57,36 @@ def init_db():
 
 def add_mock_data():
     db = get_db()
-    db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags) VALUES (?, ?, ?, ?, ?, ?)', ['Test Ticket', 'OPEN', '2018-01-01 01:22:11', '2018-01-01 02:02:02', 'Monika Mueller', '#complaint'])
+    data = gen_mock_data(100)
+    for dat in data:
+        db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags) VALUES (?, ?, ?, ?, ?, ?)', dat)
     db.commit()
-  
+    
+   
+    
+def gen_mock_data(num_data):
+    '''
+    This function create random mock database from a list of predefined data.
+    '''
+    import random
+    from random import randint
+    import datetime
+    titles = ['Complaints', 'Support', 'Return Request', 'Technical']
+    state = ['OPEN', 'On Progress', "Wait for client's action", 'Done']
+    staffs = ['Nikolas', 'Newton', 'Einstein', 'MickyMouse']
+    tags = []
+    dat = []
+    for i in range(num_data):
+        startdate=datetime.date(randint(2005,2017), randint(1,12),randint(1,28))
+        dat.append([random.choice(titles), # title
+                    random.choice(state),  # state
+                    startdate,             # created_at 
+                    startdate+datetime.timedelta(randint(1,365)), # last_updated
+                    random.choice(staffs), # created_by
+                    '' # tags
+                    ])
+    return dat
+
 
 @app.cli.command('initdb')
 def initdb_command():
