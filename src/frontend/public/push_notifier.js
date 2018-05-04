@@ -40,11 +40,12 @@ $(function () {
        console.log(data.event_type);
 
        if(data.event_type == "push"){
-        Push.create(data.payload.header, {
-            body: data.payload.message,
-            icon: 'icon.png',
+        Push.create(data.payload.header.toString() , {
+            body: data.payload.message.toString(),
+            icon: './img/icon/ticket_256.png',
             timeout: 4000,
             onClick: function () {
+                window.location 
                 window.focus();
                 this.close();
             }
