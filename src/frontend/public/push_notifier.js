@@ -31,22 +31,46 @@ function formatAMPM(date) {
 
 $(function () {
     socket = io();
-    socket.emit('event', reps_guid());
+    
+    //send register message with device timestamp
+    new Fingerprint2().get(function(fp_result, components) {
+        //console.log(fp_result) // a hash, representing your device fingerprint
+        console.log(components) // an array of FP components
+        socket.emit('client_register_event', {
+            uuid:reps_guid(),
+            timestamp:Math.floor(Date.now() / 1000),
+            fingerprint:fp_result
+        });
+      })
+    //request push permission
+    Push.Permission.request(function (){console.log("push permission ok")}, function (){alert("For live status updates. Please allow browser notifications.")});
+
 
     socket.on('message', function (data) {
        console.log(data);
 
 
-       console.log(data.event_type);
-
        if(data.event_type == "push"){
+           if(data.payload.header == undefined){
+               data.payload.header = "-- T2Ticket --";
+           }
+
+           if(data.payload.message == undefined){
+               data.payload.message = "You got a new Message";
+           }
         Push.create(data.payload.header.toString() , {
             body: data.payload.message.toString(),
-            icon: './img/icon/ticket_256.png',
+            icon: '/img/icons/ticket_256.png',
             timeout: 4000,
             onClick: function () {
-                window.location 
                 window.focus();
+                
+
+                if(data.payload.jump_location != undefined && data.payload.jump_location != null && window.location.pathname != data.payload.jump_location){
+                    window.location.pathname = data.payload.jump_location;
+                }
+
+
                 this.close();
             }
         });
