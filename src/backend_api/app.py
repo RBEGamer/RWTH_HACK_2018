@@ -179,6 +179,10 @@ def close_db(error):
 
 @app.route('/static/<path:path>')
 def send_static(path):
+    return flask.send_from_directory('../frontend/public', path)
+
+@app.route('/static2/<path:path>')
+def send_static2(path):
     return flask.send_from_directory('static', path)
 
 @app.route('/html/<path:path>')
