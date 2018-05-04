@@ -130,6 +130,10 @@ def gen_mock_data(num_data):
             # define content
             content = sender + ' is sending this message to ' + receiver 
             # define interaction type
+            if sender in staffs:
+                inter_type = 'ours'
+            else:
+                inter_type = 'theirs'
             inter_type = ''
             interaction_mock.append([ticket+1,
                                      sender, 
