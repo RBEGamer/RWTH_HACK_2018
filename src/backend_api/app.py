@@ -130,4 +130,56 @@ def list_tickets():
 @app.route('/api/tickets/create', methods=['POST'])
 def create_ticket():
     db = get_db()
-    return json.dump({'result': 'failed'})
+    ticket = request.json
+    cur = db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags) VALUES (?, ?, ?, ?, ?, ?)', [ticket['title'], ticket['state'], ticket['created_at'], ticket['last_updated'], ticket['created_by'], ticket['tags']])
+    db.commit()
+    return jsonify({'result': 'ok', 'id': cur.lastrowid})
+
+@app.route('/api/tickets/<int:ticket_id>/show')
+def show_ticket(ticket_id):
+    db = get_db()
+    cur_ticket = db.execute('select * from tickets where id=?', [ticket_id])
+    ticket = cur_ticket.fetchone()
+    ticket = dict(ticket)
+    cur_interactions = db.execute('select * from interactions where ticket_id=?', [ticket_id])
+    interactions = cur_interactions.fetchall()
+    interactions = list(map(dict, cur_interactions))
+    ticket['interactions'] = interactions
+    return jsonify(ticket)
+
+@app.route('/api/tickets/<int:ticket_id>/update', methods=['POST'])
+def update_ticket(ticket_id):
+    db = get_db()
+    ticket = request.json
+    if ticket_id != ticket.id:
+      return jsonify({'result': 'error', 'detail': 'id does not match'})
+    cur = db.execute('update tickets (title, state, created_at, last_updated, created_by, tags) VALUES (?, ?, ?, ?, ?, ?) WHERE id=?', [ticket['title'], ticket['state'], ticket['created_at'], ticket['last_updated'], ticket['created_by'], ticket['tags'], ticket_id])
+    db.commit()
+    return jsonify({'result': 'ok'})
+
+@app.route('/api/tickets/<int:ticket_id>/interactions/create', methods=['POST'])
+def create_interaction(ticket_id):
+    db = get_db()
+    interaction = request.json
+    cur = db.execute('insert interactions (interaction_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', [interaction['interaction_id'], interaction['sender'], interaction['receiver'], interaction['date'], interaction['content'], interaction['type']])
+    db.commit()
+    return jsonify({'result': 'ok', 'id': cur.lastrowid})
+
+@socketio.on('ticket-opened')
+def ticket_opened():
+    pass
+
+@socketio.on('ticket-closed')
+def ticket_closed():
+    pass
+
+@socketio.on('ticket-editing')
+def ticket_editing():
+    pass
+
+@socketio.on('ticket-edited')
+def ticket_edited():
+    pass
+
+
+
