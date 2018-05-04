@@ -203,9 +203,9 @@ def show_ticket(ticket_id):
     cur_ticket = db.execute('select * from tickets where id=?', [ticket_id])
     ticket = cur_ticket.fetchone()
     ticket = dict(ticket)
-    cur_interactions = db.execute('select * from interactions where ticket_id=? order by date ASC', [ticket_id])
+    cur_interactions = db.execute('select * from interactions where ticket_id=? order by date ASC', [int(ticket_id)])
     interactions = cur_interactions.fetchall()
-    interactions = list(map(dict, cur_interactions))
+    interactions = list(map(dict, interactions))
     ticket['interactions'] = interactions
     return jsonify(ticket)
 
