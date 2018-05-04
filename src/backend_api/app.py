@@ -56,6 +56,7 @@ def json_serial(obj):
 
 # create our little application :)
 app = Flask(__name__)
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 socketio = SocketIO(app)
 bcrypt = Bcrypt(app)
 
@@ -304,15 +305,18 @@ def list_agent():
 @app.route('/api/login', methods=['POST'])
 def login_agent():
     db = get_db()
-    cur = db.execute('select * from agents where email=?', request.form['email'])
+    cur = db.execute('select * from agents where email=?', [request.form['email']])
     user = cur.fetchone()
     if user is None:
-        return jsonify({'result': 'fail'})
+        flask.flash('Login failed')
+        return redirect("/html/login.html", code=302)
     if bcrypt.check_password_hash(user['password'], request.form['password']):
         session['id'] = user['id']
         session['is_admin'] = user['is_admin']
-        return jsonify({'result': 'ok', 'is_admin': user['is_admin']})
-    return jsonify({'result': 'fail'})
+        session['name'] = user['name']
+        return redirect("/", code=302)
+    flask.flash('Login failed')
+    return redirect("/html/login.html", code=302)
 
 @app.route('/api/tickets/submit', methods=['POST'])
 def submit_ticket():
