@@ -72,7 +72,7 @@ def gen_mock_data(num_data):
     from random import randint
     import datetime
     titles = ['Complaints', 'Support', 'Return Request', 'Technical']
-    state = ['OPEN', 'On Progress', "Wait for client's action", 'Done']
+    state = ['Open', 'Progress', 'WaitClient', 'Done']
     staffs = ['Nikolas', 'Newton', 'Einstein', 'MickyMouse']
     tags = []
     dat = []
