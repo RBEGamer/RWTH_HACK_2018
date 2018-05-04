@@ -8,7 +8,7 @@ var bodyParser = require('body-parser');
 var mail = require("nodemailer");
 var sessionstore = require('sessionstore');
 var os = require("os");
-
+var io = require('socket.io')(server);
 
 var VERSION = "1";
 var port = process.env.PORT || 3000;
@@ -41,3 +41,16 @@ server.listen(port, function () {
 
 
 
+io.on('connection', function(client){
+    client.on('event', function(data){console.log(data)});
+    client.on('disconnect', function(){});
+
+
+
+    client.emit('message', {
+        event_type:"push",
+        payload:{header:"-- T2Ticket --",
+                message: "You got a message",
+                jump_path:"/img/ticket._bw.png"}
+      });
+  });
