@@ -171,7 +171,7 @@ def close_db(error):
 
 @app.route('/static/<path:path>')
 def send_static(path):
-    return flask.send_from_directory('../frontend/public', path)
+    return flask.send_from_directory('static', path)
 
 @app.route('/<name>.js')
 def send_static_js(name):
@@ -180,6 +180,10 @@ def send_static_js(name):
 @app.route('/<name>.css')
 def send_static_css(name):
     return flask.send_from_directory('../frontend/public', name + '.css')
+
+@app.route('/bower_components/<path:path>')
+def send_static_bower(path):
+    return flask.send_from_directory('../frontend/public/bower_components', path)
 
 @app.route('/')
 def show_spa():
@@ -286,6 +290,23 @@ def logout_agent():
 def user_connected():
     send(json.dumps({'msg': 'Hello!'}))
     pass
+
+TIMEOUT_SECONDS = 60
+
+def update_in_realtime_data(ticket):
+    # remove users that have timed out
+    # and returns remaining users
+    pass
+def include_in_realtime_data(ticket, user):
+    # add the user with the current timestamp to the object
+    data = update_in_realtime_data(ticket)
+    data[user] = current_time()
+    pass
+def remove_in_realtime_data(ticket, user):
+    # remove the user with the current timestamp to the object
+    data = update_in_realtime_data(ticket)
+    if user in data:
+        del data[user]
 
 @socketio.on('ticket-opened')
 def ticket_opened(data):
