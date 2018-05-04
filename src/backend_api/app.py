@@ -257,7 +257,7 @@ def update_ticket(ticket_id):
 def create_interaction(ticket_id):
     db = get_db()
     interaction = request.json
-    cur = db.execute('insert interactions (interaction_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', [interaction['interaction_id'], interaction['sender'], interaction['receiver'], interaction['date'], interaction['content'], interaction['type']])
+    cur = db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', [interaction['ticket_id'], interaction['sender'], interaction['receiver'], interaction['date'], interaction['content'], interaction['type']])
     db.commit()
     return jsonify({'result': 'ok', 'id': cur.lastrowid})
 
@@ -308,8 +308,17 @@ def login_agent():
 @app.route('/api/tickets/submit', methods=['POST'])
 def submit_ticket():
     db = get_db()
+    name = request.form['name'] + ' <' + request.form['email'] + '>'
+    the_time = datetime.datetime.now()
+    cur = db.execute(
+        'insert into tickets (title, state, created_at, last_updated, created_by, tags, real_time_state, total_users_looking) VALUES (?, ?, ?, ?, ?, ?, "{}", 0)', 
+        [request.form['title'], 'Open', the_time, the_time, name, ''])
+    db.commit()
+    ticket_id = cur.lastrowid
+    cur = db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', [ticket_id, name, 'System', the_time, request.form['content'], 'theirs'])
+    db.commit()
     # TODO What a User Sees
-    return jsonify({'result': 'fail'})
+    return '<h1 style="text-align: center">{}</h1>'.format('Thank you for contacting us. In future communications, please refer to the following reference number: #' + str(ticket_id))
 
 
 @app.route('/api/logout', methods=['POST'])
