@@ -173,6 +173,10 @@ def close_db(error):
 def send_static(path):
     return flask.send_from_directory('static', path)
 
+@app.route('/html/<path:path>')
+def send_html(path):
+    return flask.render_template(path)
+
 @app.route('/<name>.js')
 def send_static_js(name):
     return flask.send_from_directory('../frontend/public', name + '.js')
@@ -279,6 +283,13 @@ def login_agent():
         return jsonify({'result': 'ok', 'is_admin': user['is_admin']})
     return jsonify({'result': 'fail'})
 
+@app.route('/api/tickets/submit', methods=['POST'])
+def submit_ticket():
+    db = get_db()
+    # TODO What a User Sees
+    return jsonify({'result': 'fail'})
+
+
 @app.route('/api/logout', methods=['POST'])
 def logout_agent():
     # Security: This does not prevent replay attacks
@@ -312,20 +323,24 @@ def remove_in_realtime_data(ticket, user):
 def ticket_opened(data):
     room = 'ticket:{}'.format(data['id'])
     send(json.dumps({'msg': 'Opened by: ' + data['user_name']}), room=room)
+    include_in_realtime_data(data['id'], data['user_name'])
     join_room(room)
 
 @socketio.on('ticket-closed')
 def ticket_closed(data):
     room = 'ticket:{}'.format(data['id'])
+    remove_in_realtime_data(data['id'], data['user_name'])
     leave_room(room)
     send(json.dumps({'msg': 'Closed by: ' + data['user_name']}), room=room)
 
 @socketio.on('ticket-editing')
 def ticket_editing(data):
     room = 'ticket:{}'.format(data['id'])
+    include_in_realtime_data(data['id'], data['user_name'])
     send(json.dumps({'msg': 'Editing by: ' + data['user_name']}), room=room)
 
 @socketio.on('ticket-changed')
 def ticket_changed(data):
     room = 'ticket:{}'.format(data['id'])
+    include_in_realtime_data(data['id'], data['user_name'])
     send(json.dumps({'msg': 'Changed by: ' + data['user_name']}), room=room)
