@@ -11,6 +11,19 @@ To initialize the database:
 
 # Endpoints
 
-     /frontend/index.html = /index.html
-     /frontent/* = /static/*
-     /api/tickets/list = list of tickets
+    /frontend/index.html = /index.html
+    /frontent/* = /static/*
+    /api/tickets/list = list of tickets
+    /api/tickets/<n>/show = shows details of ticket, including its interactions
+    /api/tickets/create POST = create new ticket, returns its ID
+    /api/tickets/<n>/update POST = update a ticket
+    /api/tickets/<n>/interactions/create POST = create a ticket
+
+# Socket IO
+
+    ticket-opened = when the ticket page is opened, call this event
+    ticket-closed = when the ticket page is closed, call this event
+    ticket-editing = when the user starts editing something, call this event
+    ticket-changed = when the user has edited something, call this event
+
+Clients receive events with fields msg, and send with id=`ticket_id` and `user_name` as their user name.

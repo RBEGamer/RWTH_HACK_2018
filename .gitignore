@@ -161,3 +161,5 @@ typings/
 
 # next.js build output
 .next
+src/frontend/public/.DS_Store
+src/backend_api/the.db

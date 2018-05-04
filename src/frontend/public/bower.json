@@ -1,0 +1,26 @@
+{
+  "name": "public",
+  "homepage": "https://github.com/RBEGamer/RWTH_HACK_2018",
+  "authors": [
+    "Marcel Ochsendorf <marcel.ochsendorf@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^4.1.1",
+    "push.js": "^1.0.5",
+    "socket.io-client": "^2.1.0",
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.3",
+    "jquery-ui": "^1.12.1"
+  }
+}
