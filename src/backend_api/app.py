@@ -6,6 +6,7 @@ import flask
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import json
 from flask_bcrypt import Bcrypt
+import datetime 
 
 SQL_SCHEMA = '''
 drop table if exists tickets;
@@ -16,7 +17,8 @@ create table tickets (
   created_at text not null,
   last_updated text not null,
   created_by text not null,
-  tags text not null
+  tags text not null,
+  real_time_state text not null
 );
 drop table if exists interactions;
 create table interactions (
@@ -84,7 +86,6 @@ def gen_mock_data(num_data):
     '''
     import random
     from random import randint
-    import datetime
     titles = ['Complaints', 'Support', 'Return Request', 'Technical']
     states = ['Open', 'Progress', 'WaitClient', 'Done']
     staffs = ['Nikolas', 'Newton', 'Einstein', 'MickyMouse']
@@ -293,21 +294,32 @@ def user_connected():
 
 TIMEOUT_SECONDS = 60
 
-def update_in_realtime_data(ticket):
+def update_in_realtime_data(ticket, user):
     # remove users that have timed out
-    # and returns remaining users
-    pass
+    # and returns remaining users    
+    data = json.loads(ticket.real_time_state)
+    curtime = datetime.datetime.now()    
+    if curtime - data[user] >= TIMEOUT_SECONDS:
+        del data[user]
+    else:
+        data[user] = curtime
+    return jsonify(data)
+        
 def include_in_realtime_data(ticket, user):
     # add the user with the current timestamp to the object
-    data = update_in_realtime_data(ticket)
-    data[user] = current_time()
-    pass
+    db = get_db()
+    data = update_in_realtime_data(ticket, user)
+    data[user] = datetime.datetime.now()
+    db.execute('update tickets (real_time_state) VALUES (?) where id=?', [json.dumps(data), ticket.id])
+    
 def remove_in_realtime_data(ticket, user):
     # remove the user with the current timestamp to the object
-    data = update_in_realtime_data(ticket)
+    db = get_db()
+    data = update_in_realtime_data(ticket, user)
     if user in data:
         del data[user]
-
+    db.execute('insert into tickets (real_time_state) VALUES (?), data)
+    
 @socketio.on('ticket-opened')
 def ticket_opened(data):
     room = 'ticket:{}'.format(data['id'])
