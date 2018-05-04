@@ -4,8 +4,8 @@
    <head>
       <!-- MAIN CSS INCLUDE -->
       <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-      <link href="./dash_main.css" rel="stylesheet">
-      <link href="./color_palette.css" rel="stylesheet">
+      <link href="/dash_main.css" rel="stylesheet">
+      <link href="/color_palette.css" rel="stylesheet">
       <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
       <link rel="icon" href="/favicon.ico" type="image/x-icon">
    </head>
@@ -130,30 +130,36 @@
                                           <thead class='table-head td'>
                                              <tr>
                                                 <th>TICKET ID</th>
-                                                <th>TICKET TITLE</th>
-                                                <th>DEPARTMENT</th>
+                                                <th>TITLE</th>
+                                                <th>AUTHOR</th>
                                                 <th>DATE</th>
-                                                <th>CLIENT</th>
-                                                <th>LAST ACTION</th>
+                                                <th>LAST UPDATE</th>
                                                 <th>STATUS</th>
+                                                <th>TOPICS</th>
                                              </tr>
                                           </thead>
+                                        
                                           <tbody>
-                                             <template  v-for="item in items">
+                                             <template  v-for="item in recent_ticket_tems">
                                                 <tr>
-                                                   <th>{{item.TICKET_ID}}</th>
-                                                   <th>{{item.TICKET_TITLE}}</th>
-                                                   <th>{{item.DEPARTMENT}}</th>
-                                                   <th>{{item.DATE}}</th>
-                                                   <th>{{item.CLIENT}}</th>
-                                                   <th>{{item.LAST_ACTION}}</th>
-                                                   <th>{{item.STATUS}}</th>
+                                                   <th>
+                                                         {{item.id}}
+                                                      
+
+
+                                                      </th>
+                                                   <th>{{item.title}}</th>
+                                                   <th>{{item.created_by}}</th>
+                                                   <th>{{item.created_at}}</th>
+                                                   <th>{{item.last_update}}</th>
+                                                   <th>{{item.state}}</th>
+                                                   <th>{{item.tag}}</th>
                                                 </tr>
                                              </template>
                                           </tbody>
                                        </table>
                                     </div>
-                                    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+                                   
                                  </div>
                               </div>
                            </div>
@@ -258,13 +264,16 @@
       <!-- /#page-wrapper -->
       </div>
       <!-- MAIN JS INCLUDE -->
-      <script src="./bower_components/jquery/dist/jquery.min.js"></script>
+      <script src="/bower_components/jquery/dist/jquery.min.js"></script>
       <script src="./bower_components/jquery-ui/jquery-ui.min.js"></script>
       <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
       <script src="./dash_main.js"></script>
       <script src="./vue_main.js"></script>
       <script src="./bower_components/push.js/bin/push.min.js"></script>
       <script src="./bower_components/socket.io-client/dist/socket.io.js"></script>
+
+      <script src="./bower_components/vue/dist/vue.js"></script>
+      
       <!--<script src="./push_notifier.js"></script>-->
    </body>
 </html>
