@@ -72,10 +72,19 @@
                </ul>
             </div>
             <!-- /.navbar-collapse -->
+
+
          </nav>
          <div id="page-wrapper">
             <div class="container-fluid">
                <!-- Page Heading -->
+
+
+               
+               <script src="./bower_components/vue/dist/vue.js"></script>
+               <div id="app">
+
+           
                <div class="row" id="main" >
                   <div class="col-md-12 well" id="content">
                      <div class="container">
@@ -83,7 +92,7 @@
                            <div class=" col-md-3">
                               <div class="color-primary-1bg block_box">
                                  <i></i>
-                                 <h2>All Tickets</h2>
+                                 <h2>All Tickets ( {{ all_ticket_count }} )</h2>
                               </div>
                            </div>
                            <div class="col-md-3">
@@ -251,6 +260,16 @@
                </div>
                <!-- /.row -->
             </div>
+
+
+
+
+
+
+
+</div>
+
+
             <!-- /.container-fluid -->
          </div>
          <!-- /#page-wrapper -->
@@ -260,9 +279,24 @@
       <script src="./bower_components/jquery-ui/jquery-ui.min.js"></script>
       <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
       <script src="./dash_main.js"></script>
+      <script src="./bower_components/fingerprintjs2/dist/fingerprint2.min.js"></script>
       <script src="./bower_components/push.js/bin/push.min.js"></script>
       <script src="./bower_components/socket.io-client/dist/socket.io.js"></script>
-      <!--<script src="./push_notifier.js"></script>-->
+      <script src="./push_notifier.js"></script>
+
+
+
+      
+      <script type="text/javascript"> 
+      new Vue({
+        el: '#app',
+        data: {
+            all_ticket_count: 1
+        }
+      })
+    </script>
+
+
    </body>
 </html>
 
