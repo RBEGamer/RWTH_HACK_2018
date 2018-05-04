@@ -42,6 +42,8 @@ server.listen(port, function () {
 
 
 io.on('connection', function(client){
+    console.log(client);
+    client.on('client_register_event', function(data){console.log(data)});
     client.on('event', function(data){console.log(data)});
     client.on('disconnect', function(){});
 
@@ -51,6 +53,9 @@ io.on('connection', function(client){
         event_type:"push",
         payload:{header:"-- T2Ticket --",
                 message: "You got a message",
-                jump_path:"/img/ticket._bw.png"}
+                jump_location:"/img/icons/ticket_256.png", //jump to a specific oath /.../.. leave blank to stay on page
+                post_action:""
+
+        }
       });
   });
