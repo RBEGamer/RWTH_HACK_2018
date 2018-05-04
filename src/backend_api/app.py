@@ -57,9 +57,11 @@ def init_db():
 
 def add_mock_data():
     db = get_db()
-    data = gen_mock_data(100)
-    for dat in data:
-        db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags) VALUES (?, ?, ?, ?, ?, ?)', dat)
+    list_mock, interaction_mock = gen_mock_data(7)
+    for l_mock in list_mock:
+        cur = db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags) VALUES (?, ?, ?, ?, ?, ?)', l_mock)
+    for i_mock in interaction_mock:
+        db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', i_mock)    
     db.commit()
     
    
@@ -72,20 +74,59 @@ def gen_mock_data(num_data):
     from random import randint
     import datetime
     titles = ['Complaints', 'Support', 'Return Request', 'Technical']
-    state = ['Open', 'Progress', 'WaitClient', 'Done']
+    states = ['Open', 'Progress', 'WaitClient', 'Done']
     staffs = ['Nikolas', 'Newton', 'Einstein', 'MickyMouse']
+    clients = ['Sarah', 'Curie', 'MinnieMouse']
     tags = []
-    dat = []
-    for i in range(num_data):
-        startdate=datetime.date(randint(2005,2017), randint(1,12),randint(1,28))
-        dat.append([random.choice(titles), # title
-                    random.choice(state),  # state
-                    startdate,             # created_at 
-                    startdate+datetime.timedelta(randint(1,365)), # last_updated
-                    random.choice(staffs), # created_by
+    list_mock = []
+    interaction_mock = []
+    for ticket in range(num_data):
+        this_title = random.choice(titles)
+        this_state = random.choice(states)
+        created_at = datetime.date(randint(2005,2017), randint(1,12),randint(1,28))
+        last_updated = created_at + datetime.timedelta(randint(1,365))
+        created_by = random.choice(staffs)
+        list_mock.append([this_title, 
+                    this_state,  
+                    created_at,              
+                    last_updated, 
+                    created_by, 
                     '' # tags
                     ])
-    return dat
+        if this_state == 'Open':
+            num_inter = 1
+        else:
+            num_inter = random.randint(1,5)
+        for i in range(num_inter):
+            # define sender
+            if i == 0: 
+                sender = random.choice(clients)
+            else:
+                sender = random.choice(staffs + clients)
+            # define receiver
+            if sender in staffs:
+                receiver = random.choice(clients)
+            elif sender in clients:
+                receiver = random.choice(staffs)
+            else:
+                receiver = None
+            # define date
+            if i == 0:
+                date = created_at
+            else:
+                date = created_at + (last_updated - created_at) * random.random()
+            # define content
+            content = sender + ' is sending this message to ' + receiver 
+            # define interaction type
+            inter_type = ''
+            interaction_mock.append([ticket+1,
+                                     sender, 
+                                    receiver, 
+                                    date, 
+                                    content, 
+                                    inter_type])
+        
+    return list_mock, interaction_mock
 
 
 @app.cli.command('initdb')
@@ -172,6 +213,13 @@ def create_interaction(ticket_id):
     cur = db.execute('insert interactions (interaction_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', [interaction['interaction_id'], interaction['sender'], interaction['receiver'], interaction['date'], interaction['content'], interaction['type']])
     db.commit()
     return jsonify({'result': 'ok', 'id': cur.lastrowid})
+
+@app.route('/api/interactions/list')
+def list_interactions():
+    db = get_db()
+    cur = db.execute('select * from interactions')
+    interaction = list(map(dict, cur.fetchall()))
+    return jsonify(interaction)
 
 @socketio.on('connected')
 def user_connected():
