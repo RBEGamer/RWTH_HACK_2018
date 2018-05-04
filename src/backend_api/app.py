@@ -3,10 +3,11 @@ from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash, jsonify
 import flask
-from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask_socketio import SocketIO, emit, join_room, leave_room, send
 import json
 from flask_bcrypt import Bcrypt
 import datetime 
+import dateutil.parser
 
 SQL_SCHEMA = '''
 drop table if exists tickets;
@@ -42,6 +43,12 @@ create table agents (
 
 # TODO: User permissions, not included for development
 
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
 
 # create our little application :)
 app = Flask(__name__)
@@ -73,7 +80,7 @@ def add_mock_data():
     db = get_db()
     list_mock, interaction_mock = gen_mock_data(7)
     for l_mock in list_mock:
-        cur = db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags) VALUES (?, ?, ?, ?, ?, ?)', l_mock)
+        cur = db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags, real_time_state) VALUES (?, ?, ?, ?, ?, ?, "{}")', l_mock)
     for i_mock in interaction_mock:
         db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', i_mock)    
     db.commit()
@@ -228,7 +235,7 @@ def update_ticket(ticket_id):
     ticket = request.json
     if ticket_id != ticket.id:
       return jsonify({'result': 'error', 'detail': 'id does not match'})
-    cur = db.execute('update tickets (title, state, created_at, last_updated, created_by, tags) VALUES (?, ?, ?, ?, ?, ?) WHERE id=?', [ticket['title'], ticket['state'], ticket['created_at'], ticket['last_updated'], ticket['created_by'], ticket['tags'], ticket_id])
+    cur = db.execute('update tickets set title = ?, state = ?, created_at = ?, last_updated = ?, created_by = ?, tags = ? where id=?', [ticket['title'], ticket['state'], ticket['created_at'], ticket['last_updated'], ticket['created_by'], ticket['tags'], ticket_id])
     db.commit()
     return jsonify({'result': 'ok'})
 
@@ -261,7 +268,7 @@ def update_agent(agent_id):
     agent = request.json
     if agent_id != agent.id:
       return jsonify({'result': 'fail', 'error': 'Agent ID mismatch'})
-    db.execute('update agents (is_admin, name, email, password) VALUES (?, ?, ?, ?) WHERE id=?', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password']), agent_id])
+    db.execute('update agents set is_admin = ?, name = ?, email = ?, password = ? where id = ?', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password']), agent_id])
     return jsonify({'result': 'ok'})
 
 @app.route('/api/agents/list')
@@ -305,34 +312,40 @@ def user_connected():
 
 TIMEOUT_SECONDS = 60
 
-def update_in_realtime_data(ticket, user):
+def update_in_realtime_data(ticket):
     # remove users that have timed out
     # and returns remaining users    
-    data = json.loads(ticket.real_time_state)
+    print(ticket)
+    data = json.loads(ticket['real_time_state'])
     curtime = datetime.datetime.now()    
-    if curtime - data[user] >= TIMEOUT_SECONDS:
-        del data[user]
+    for user in list(data):
+        if (curtime - dateutil.parser.parse(data[user])).total_seconds() >= TIMEOUT_SECONDS:
+            del data[user]
     return data
         
 def include_in_realtime_data(ticket, user):
     # add the user with the current timestamp to the object
     db = get_db()
-    ticket = dict(db.execute('select * from tickets where id=?', ticket).fetchone())
-    data = update_in_realtime_data(ticket, user)
+    ticket = dict(db.execute('select * from tickets where id=?', [ticket]).fetchone())
+    data = update_in_realtime_data(ticket)
     data[user] = datetime.datetime.now()
-    db.execute('update tickets (real_time_state) VALUES (?) where id=?', [json.dumps(data), ticket['id']])
+    print(data)
+    db.execute('update tickets set real_time_state = ? where id=?', [json.dumps(data, default=json_serial), ticket['id']])
+    db.commit()
     
 def remove_in_realtime_data(ticket, user):
     # remove the user with the current timestamp to the object
     db = get_db()
-    ticket = dict(db.execute('select * from tickets where id=?', ticket).fetchone())
-    data = update_in_realtime_data(ticket, user)
+    ticket = dict(db.execute('select * from tickets where id=?', [ticket]).fetchone())
+    data = update_in_realtime_data(ticket)
     if user in data:
         del data[user]
-    db.execute('update tickets (real_time_state) VALUES (?) where id=?', [json.dumps(data), ticket['id']])
+    db.execute('update tickets set real_time_state = ? where id = ?', [json.dumps(data, default=json_serial), ticket['id']])
+    db.commit()
     
 @socketio.on('ticket-opened')
 def ticket_opened(data):
+    print(data)
     room = 'ticket:{}'.format(data['id'])
     send(json.dumps({'msg': 'Opened by: ' + data['user_name']}), room=room)
     include_in_realtime_data(data['id'], data['user_name'])
