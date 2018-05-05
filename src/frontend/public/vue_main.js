@@ -28,17 +28,24 @@ for (var j = 0; j < data[i].total_users_editing; j++) {
 }    
 
 
+//SET STATE IDS
+data[i].state_id = 0;
+if(data[i].state != undefined && data[i].state == "Progress"){
+  data[i].state_id = 1;
+}
 
     if(data[i].state != undefined && data[i].state == "Done"){
       sv++;
-      console.log(data[i].collab_action);
-      
+      data[i].state_id = 2;
     }
     
+
+
+
     data[i].collab_action = tmp;
-    console.log(data[i].collab_action);
+
   }
-    app.recent_ticket_tems = data
+    app.recent_ticket_tems = data;
     app.all_ticket_count = data.length;
     app.solved_ticket_count = sv;
     app.pending_ticket_count = data.length - sv;
@@ -68,8 +75,7 @@ var app = new Vue({
 
 
 update_recent_table();
-
-//setInterval(function(){ update_recent_table(); }, 500);
+setInterval(function(){ update_recent_table(); }, 500);
 
 
 
