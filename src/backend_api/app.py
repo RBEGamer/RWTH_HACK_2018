@@ -289,9 +289,7 @@ def update_ticket(ticket_id):
         return redirect('/html/login.html')
     db = get_db()
     ticket = request.json
-    if ticket_id != ticket.id:
-      return jsonify({'result': 'error', 'detail': 'id does not match'})
-    cur = db.execute('update tickets set title = ?, state = ?, created_at = ?, last_updated = ?, created_by = ?, tags = ? where id=?', [ticket['title'], ticket['state'], ticket['created_at'], ticket['last_updated'], ticket['created_by'], ticket['tags'], ticket_id])
+    cur = db.execute('update tickets set title = ?, state = ?, tags = ? where id=?', [ticket['title'], ticket['state'], ticket['tags'], ticket_id])
     db.commit()
     return jsonify({'result': 'ok'})
 
