@@ -80,6 +80,7 @@
           <template  v-for="name in single_ticket_editing">
             <img style="height:0.8em" class="rounded-circle" v-bind:title="name" src="{% include "pen.txt" %}">
           </template>
+          <a href="#" name="go" class="btn btn-lg btn-primary float-right" @click="start_edit">Edit</a>
         </h1>
         <table class="table">
           <thead>
@@ -101,6 +102,29 @@
         </table>
       </div>
     </div>
+    <form v-if="is_editing" class="mb-4 p-3 border" style="margin-top: 0; border: solid #333; border-radius: 5px">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" class="form-control" v-model="edit_ticket.title">
+      </div>
+      <div class="form-group">
+        <label>Tags</label>
+        <input type="text" class="form-control" v-model="edit_ticket.tags">
+      </div>
+      <div class="form-group">
+        <label>State</label>
+        <select class="form-control" v-model="edit_ticket.state">
+          <option>Open</option>
+          <option>Done</option>
+          <option>Progress</option>
+          <option>WaitClient</option>
+        </select>
+      </div>
+      
+      <a href="#" name="go" class="btn btn-lg btn-primary" @click="submit_edit">Submit</a>
+      <a href="#" name="go" class="btn btn-lg btn-secondary" @click="cancel_edit">Cancel</a>
+
+    </form>
     <div class="row" v-for="interaction in single_ticket.interactions">
       <div class="col-md-3" v-if="interaction.type=='ours'">
         <div>
@@ -203,7 +227,12 @@ let app = new Vue({
     single_ticket: { real_time_state: {} },
     state: 'list',
     single_interaction: '',
-    editing_ticket: false,
+    is_editing: false,
+    edit_ticket: {
+      title: '',
+      tags: '',
+      state: 'Done'
+    },
     realtime_data: {}
   },
   methods: {
@@ -253,7 +282,38 @@ let app = new Vue({
       return Object.keys(state).filter(function(k) {
         return 'opened' in state[k] && !('editing' in state[k]);
       });
-    }
+    },
+    start_edit: function() {
+      app.is_editing = true;
+      app.edit_ticket.title = app.single_ticket.title;
+      app.edit_ticket.tags = app.single_ticket.tags;
+      app.edit_ticket.state = app.single_ticket.state;
+    },
+    cancel_edit: function() {
+      app.is_editing = false;
+      app.edit_ticket.title = '';
+      app.edit_ticket.tags = '';
+      app.edit_ticket.state = 'Done';
+    },
+    submit_edit: function() {
+      i_did_that = true;
+      socket.emit('ticket-changed', {id: app.single_ticket.id, user_name: user_name});
+      $.ajax('/api/tickets/'+app.single_ticket.id+'/update', {
+          data : JSON.stringify(app.edit_ticket),
+          contentType : 'application/json',
+          type : 'POST',
+          success: function() {
+            $.get('/api/tickets/'+app.single_ticket.id+'/show', function(data) {
+              app.single_ticket = data;
+              app.single_interaction = '';
+            });
+          }
+      });
+      app.is_editing = false;
+      app.edit_ticket.title = '';
+      app.edit_ticket.tags = '';
+      app.edit_ticket.state = 'Done';
+    },
   },
   computed: {
     single_ticket_editing: function() {
@@ -273,7 +333,7 @@ $(function() {
   });
   setInterval(function() {
     if (app.state == 'single') {
-      if (app.single_interaction != '' || app.editing_ticket) {
+      if (app.single_interaction != '' || app.is_editing) {
         socket.emit('ticket-editing', {id: app.single_ticket.id, user_name: user_name});
       } else {
         socket.emit('ticket-opened', {id: app.single_ticket.id, user_name: user_name});
