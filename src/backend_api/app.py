@@ -220,7 +220,7 @@ def send_static_css(name):
     return flask.send_from_directory('../frontend/public', name + '.css')
 
 @app.route('/<name>.html')
-def send_static_css(name):
+def send_static_html(name):
     return flask.send_from_directory('../frontend/public', name + '.html')
 
 @app.route('/bower_components/<path:path>')
