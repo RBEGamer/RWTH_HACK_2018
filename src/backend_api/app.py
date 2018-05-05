@@ -505,6 +505,12 @@ def ticket_opened(data):
     emit('ticket-opened', data, room=room)
     join_room(room)
 
+@socketio.on('ticket-open')
+def ticket_open(data):
+    room = 'ticket:{}'.format(data['id'])
+    data = include_in_realtime_data(data['id'], data['user_name'], 'opened')
+    send(data, room=room)
+
 @socketio.on('ticket-closed')
 def ticket_closed(data):
     room = 'ticket:{}'.format(data['id'])
