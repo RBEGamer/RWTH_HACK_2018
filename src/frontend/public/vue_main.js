@@ -111,16 +111,29 @@ var _escapeString = function (val) {
 
 
 function load_ticket_view(_id){
-  alert("loading ticket " + _id);
+ 
   clearInterval(ins_id);
   $.get( "http://127.0.0.1:5000/tmpl_ticket.html", function( data_html ) {
     $.getJSON( "http://127.0.0.1:5000/api/tickets/" + _id + "/show", function( data_json ) {
+      $("#singlepageloader").html(data_html);
+      app = new Vue({
+        el: '#app',
+        data: {
+          single_ticket: data_json
+        }
+      });
+
+
+
 
     });
   });
   //refresh view
 
 }
+
+
+
 
 
 function update_recent_table(){
