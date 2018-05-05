@@ -4,30 +4,41 @@
 function update_recent_table(){
   $.getJSON( "http://127.0.0.1:5000/api/tickets/list", function( data ) {
     if(data == null || data == undefined){console.log("data empty");return;}
-if(data.length <= 0){return;}
+    if(data.length <= 0){return;}
 
 
-    app.recent_ticket_tems = data
+  
+    
   var sv = 0;
   
-    for (i = 0; i < data.length; i++) { 
+    for (var i = 0; i < data.length; i++) { 
 
 //1 -> eye blue
 //2 -> pencil yellow
 //3 -> avatar green
-      data.collab_action = [
-        {action:1,desc:"Marcel"},
-        {action:2,desc:"Marcel"},
-        {action:3,desc:"Marcel"}, 
-      ];
+data[i].collab_action = [ ];
+var tmp = [];
+
+for (var j = 0; j < data[i].total_users_looking; j++) {
+  tmp.push({action:1,desc:data[i].users_looking[j].toString()});
+  console.log(data[i].users_looking[j]);
+}
+for (var j = 0; j < data[i].total_users_editing; j++) { 
+  tmp.push({action:1,desc:data[i].users_editing[j].toString()});
+}    
+
+
+
     if(data[i].state != undefined && data[i].state == "Done"){
       sv++;
-      console.log(data.collab_action);
+      console.log(data[i].collab_action);
       
     }
     
+    data[i].collab_action = tmp;
+    console.log(data[i].collab_action);
   }
-    
+    app.recent_ticket_tems = data
     app.all_ticket_count = data.length;
     app.solved_ticket_count = sv;
     app.pending_ticket_count = data.length - sv;
@@ -58,7 +69,7 @@ var app = new Vue({
 
 update_recent_table();
 
-setInterval(function(){ update_recent_table(); }, 500);
+//setInterval(function(){ update_recent_table(); }, 500);
 
 
 
