@@ -138,7 +138,7 @@
           <pre>${ interaction.content }</pre>
         </div>
       </div>
-      <div class="col-md-3" v-if="interaction.type=='theirs'">
+      <div class="col-md-3 text-right" v-if="interaction.type=='theirs'">
         <div>
           ${ interaction.date }<br>
           <i>From</i> ${ interaction.sender }<br>
@@ -190,12 +190,12 @@ let edit_throttle = throttle(function() {
 }, 1000);
 
 socket.on('ticket-opened', function(data) {
-  if (perm_notify && i_did_that) {
+  console.log(data);
+  if (perm_notify) {
     var n = new Notification('Ticket opened by someone else.');
     setTimeout(n.close.bind(n), 5000);  
   }
   app.single_ticket.real_time_state = data;
-  i_did_that = false;
 });
 
 socket.on('message', function(data) {
@@ -210,7 +210,7 @@ socket.on('ticket-changed', function(data) {
     $.get('/api/tickets/'+app.single_ticket.id+'/show', function(data) {
       app.single_ticket = data;
     });
-    if (perm_notify && i_did_that) {
+    if (perm_notify && ! i_did_that) {
       var n = new Notification('Ticket has been modified.');
       setTimeout(n.close.bind(n), 5000);  
     }
@@ -238,7 +238,6 @@ let app = new Vue({
   methods: {
     show_ticket: function(k) {
       app.single_ticket = this.tickets[k];
-      i_did_that = true;
       socket.emit('ticket-opened', {id: app.single_ticket.id, user_name: user_name});
       app.state = 'single';
       $.get('/api/tickets/'+app.single_ticket.id+'/show', function(data) {
@@ -247,7 +246,7 @@ let app = new Vue({
     },
     show_list: function() {
       socket.emit('ticket-closed', {id: app.single_ticket.id, user_name: user_name});
-      app.single_ticket = {};
+      app.single_ticket = { real_time_state: {} };
       $.get('/api/tickets/list', function(data) {
         app.tickets = data;
         app.state = 'list';
@@ -336,7 +335,7 @@ $(function() {
       if (app.single_interaction != '' || app.is_editing) {
         socket.emit('ticket-editing', {id: app.single_ticket.id, user_name: user_name});
       } else {
-        socket.emit('ticket-opened', {id: app.single_ticket.id, user_name: user_name});
+        socket.emit('ticket-open', {id: app.single_ticket.id, user_name: user_name});
       }
     }
   }, 1000);
