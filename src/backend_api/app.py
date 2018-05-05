@@ -276,7 +276,7 @@ def show_ticket(ticket_id):
     return jsonify(ticket)
 
 @app.route('/api/tickets/search')
-def search_ticket():
+def search_ticket(methods=['POST']):
     db = get_db()
     qry = request.json
     cur = db.execute(qry)
