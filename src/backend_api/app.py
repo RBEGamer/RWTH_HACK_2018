@@ -255,7 +255,7 @@ def send_static_bower(path):
 def show_spa():
     if AUTH and 'name' not in session:
         return redirect('/html/login.html')
-    return flask.send_from_directory('../frontend/public', 'index.html')
+    return render_template('list.html')
 
 # TODO: Allow sorting, filtering and pagination
 @app.route('/api/tickets/list')
