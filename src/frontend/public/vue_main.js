@@ -4,7 +4,7 @@ function load_dashboard_view(){
   alert("loading dash");
 }
 
-<<<<<<< HEAD:src/frontend/public/_____vue_main.js
+
   $.get( "http://127.0.0.1:5000/tmpl_dashboard.html", function( data ) {
 
     if(data == undefined || data == null || data == ""){
@@ -33,11 +33,11 @@ function load_dashboard_view(){
     create_chart();
     refreshIntervalId = setInterval(function(){ update_recent_table(); }, 500);
   });
-=======
+
 
 function load_ticket_view(_id){
   alert("loading ticket " + _id);
->>>>>>> f4c9b3f6a59ac0c844e51a427be3ca8e3ff56640:src/frontend/public/vue_main.js
+
 
   $.getJSON( "http://127.0.0.1:5000/api/tickets/"+_id+"/show", function( data ) {
 
@@ -56,15 +56,14 @@ function update_recent_table(){
   
     for (var i = 0; i < data.length; i++) { 
 
-<<<<<<< HEAD:src/frontend/public/_____vue_main.js
   $.get( "http://127.0.0.1:5000/tmpl_ticket.html", function( data ) {
-=======
+
 //1 -> eye blue
 //2 -> pencil yellow
 //3 -> avatar green
 data[i].collab_action = [ ];
 var tmp = [];
->>>>>>> f4c9b3f6a59ac0c844e51a427be3ca8e3ff56640:src/frontend/public/vue_main.js
+
 
 for (var j = 0; j < data[i].total_users_looking; j++) {
   tmp.push({action:1,desc:data[i].users_looking[j].toString()});
@@ -81,7 +80,7 @@ if(data[i].state != undefined && data[i].state == "Progress"){
   data[i].state_id = 1;
 }
 
-<<<<<<< HEAD:src/frontend/public/_____vue_main.js
+
     $.getJSON( "http://127.0.0.1:5000/api/tickets/"+_id+"/show", function( data ) {
 if(data == undefined){console.log("data empty"); return;}
 
@@ -96,29 +95,26 @@ app.$forceUpdate();
 
 
   });
-=======
+
     if(data[i].state != undefined && data[i].state == "Done"){
       sv++;
       data[i].state_id = 2;
     }
     
->>>>>>> f4c9b3f6a59ac0c844e51a427be3ca8e3ff56640:src/frontend/public/vue_main.js
 
     data[i].link_id = "load_ticket_view(" + data[i].id + ")";
     console.log(data[i].id);
 
-<<<<<<< HEAD:src/frontend/public/_____vue_main.js
-  
+
 
   });
 
 
   
   //refresh view
-=======
+
    // $('#'+ data[i].link_id).click(function(){ load_ticket_view(); return false; });
 
->>>>>>> f4c9b3f6a59ac0c844e51a427be3ca8e3ff56640:src/frontend/public/vue_main.js
 
     data[i].collab_action = tmp;
 
@@ -213,8 +209,7 @@ $("#btn1").on("click", function(){
    state = "All";
    button_submit();
 
-<<<<<<< HEAD:src/frontend/public/_____vue_main.js
-=======
+
 });
 
 $("#btn2").on("click", function(){
@@ -258,7 +253,6 @@ $("#btn9").on("click", function(){
   refer = "created_at";
   button_submit();
 });
->>>>>>> f4c9b3f6a59ac0c844e51a427be3ca8e3ff56640:src/frontend/public/vue_main.js
 
 
 function button_submit(){
@@ -271,17 +265,13 @@ function button_submit(){
   var sv = 0;
     for (var i = 0; i < data.length; i++) { 
 
-<<<<<<< HEAD:src/frontend/public/_____vue_main.js
-//setInterval(function(){ update_recent_table(); }, 500);
 
-
-=======
 //1 -> eye blue
 //2 -> pencil yellow
 //3 -> avatar green
 data[i].collab_action = [ ];
 var tmp = [];
->>>>>>> f4c9b3f6a59ac0c844e51a427be3ca8e3ff56640:src/frontend/public/vue_main.js
+
 
 for (var j = 0; j < data[i].total_users_looking; j++) {
   tmp.push({action:1,desc:data[i].users_looking[j].toString()});
