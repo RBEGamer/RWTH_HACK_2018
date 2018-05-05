@@ -64,13 +64,258 @@
                <!-- Page Heading -->
                <script src="https://unpkg.com/vue"></script>
                <div id="app">
-<div id="single_page_view_area">
+                  <div class="row" id="main" >
+                     <div class="col-md-12 well" id="content">
+                        <div class="container">
+                           <div class="row">
+                              <div class=" col-md-3">
+                                 <div class="color-primary-1bg block_box">
+                                    <i></i>
+                                    <h2>
+                                       <p class="text-center">All</p>
+                                    </h2>
+                                    <h2>
+                                       <p class="text-center color-swhite">{{ all_ticket_count }}</p>
+                                    </h2>
+                                 </div>
+                              </div>
+                              <div class="col-md-3">
+                                 <div class="color-secondary-1-1bg block_box">
+                                    <i></i>
+                                    <h2>
+                                       <p class="text-center">Solved</p>
+                                    </h2>
+                                    <h2>
+                                       <p class="text-center color-swhite">{{ solved_ticket_count }}</p>
+                                    </h2>
+                                 </div>
+                              </div>
+                              <div class="col-md-3">
+                                 <div class="color-secondary-2-1bg block_box">
+                                    <i></i>
+                                    <h2>
+                                       <p class="text-center">Pending</p>
+                                    </h2>
+                                    <h2>
+                                       <p class="text-center color-swhite">{{ pending_ticket_count }}</p>
+                                    </h2>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <!-- table -->
+                        <div class="container">
+                        <div class="row">
+                        <div class="col-md-4">
+                        <div class="btn-group" role="group" aria-label="Basic example" id="button1">
+                        <button type="button" id="btn1" value="1" class="btn btn-primary .btn.active">All</button>
+                        <button type="button" id="btn2" value="2" class="btn btn-primary">Open</button>
+                        <button type="button" id="btn3" class="btn btn-primary">Done</button>
+                        <button type="button" id="btn4" class="btn btn-primary">Progress</button>
+                        <button type="button" id="btn5" class="btn btn-primary">WaitClient</button>
+                        </div>
+                        </div>
+                        <div class="col-md-2">
+                        <div class="btn-group" id="button2">
+                        <button type="button" id="btn6" class="btn btn-primary .btn.active">Newest</button>
+                        <button type="button" id="btn7" class="btn btn-primary">Oldest</button>
+                        </div>
+                        </div>
+                        <div class="col-md-3">
+                        <div class="btn-group" id="button3">
+                        <button type="button" id="btn8" class="btn btn-primary .btn.active">By Last Update</button>
+                        <button type="button" id="btn9"class="btn btn-primary">By Created</button>
+                        </div> 
+                        </div>
+                        </div>
+
+                        <select v-model="selected" >
+                        <option disabled value="">Please select one</option>
+                        <option>state</option>
+                        <option>created_older</option>
+                        <option>created_newer</option>
+                        <option>updated_older</option>
+                        <option>updated_newer</option>
+                        <option>tag</option>
+                        </select>
+                        <input v-model="argument" placeholder="Filter">
+                        <select v-model="sort" >
+                        <option disabled value="">Please select one</option>
+                        <option>ASC</option>
+                        <option>DESC</option>
+                        </select>
+                        
+                        <a v-bind:href="'javascript:sortcall()'">search</a>              
+                        </div>
+                        </div>
+                        </div>
+                        <div class="container">
+                           <div class="row">
+                              <div class="col-md-12">
+                                 <div class="panel panel-default ticket-list">
+                                    <div class="panel-heading">
+                                       <h3 class="panel-title text-center">Recent Tickets</h3>
+                                    </div>
+                                    <div class="panel-body ">
+                                       <table class="table td">
+                                          <thead class='table-head td'>
+                                             <tr>
+                                                <th>TICKET ID</th>
+                                                <th>TITLE</th>
+                                                <th>AUTHOR</th>
+                                                <th>DATE</th>
+                                                <th>LAST UPDATE</th>
+                                                <th>STATUS</th>
+                                                <th>TOPICS</th>
+                                                <th>TEAM-ACTIONS</th>
+                                             </tr>
+                                          </thead>
+                                        
+                                          <tbody>
+                                             <template  v-for="item in recent_ticket_tems">
+                                                <tr>
+                                                            
+                                                   <th>
+                                                            <a v-bind:onclick="item.link_id"  title="Click to open a ticket">      {{item.id}}</a> 
+                                                      
+
+
+                                                      </th>
+                                                   <th>{{item.title}}</th>
+                                                   <th>{{item.created_by}}</th>
+                                                   <th>{{item.created_at}}</th>
+                                                   <th>{{item.last_updated}}</th>
+
+
+                                                   <th>
+                                                            <span  v-if="item.state_id == 0" class="badge badge-pill badge-secondary color-secondary-2-1bg">{{item.state}}</span>
+                                                            <span  v-if="item.state_id == 1" class="badge badge-pill badge-light color-secondary-2-5bg">{{item.state}}</span>
+                                                            <span  v-if="item.state_id == 2" class="badge badge-pill badge-success color-secondary-1-1bg">{{item.state}}</span>
+                                                            
+                                                   </th>
 
 
 
+                                                   <th>{{item.tag}}</th>
 
-
-</div>
+                                                   
+                                                   <th>
+                                                   <template  v-for="item_colab in item.collab_action">
+                                                <!-- eye blue -->
+                                                <img width="32px" class="rounded-circle"  v-bind:title="item_colab.desc"   v-if="item_colab.action == 1" src=" data:image/png;base64,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">
+                                                <img width="32px" class="rounded-circle" v-bind:title="item_colab.desc" v-if="item_colab.action == 2" src=" data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4gUFADsj9rPxIQAAECtJREFUWAkBIBDf7wFxcXob5OTb9AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARABERAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABwcH/wCZmZkPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/qv8DAO/TJQAFAfUBYi3jAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+QxSwA7MmPAP/6vQD8/a7/nNNdAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA+YW0YwAA/ZsA/f5tAP39GgD+/TQA/vxz/5zSOQAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+LuRa+/ttM4vvsiiP8CRIBAAAAAP//AAAAAAAA/wMvAP7+Zv+q4tABVh73AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/qtQGANvfX/n39VgN9/0q5gvwEgv1BQAZDBoAAAAAAAAAAAAA//8AAAICXADt6sEAAACgAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+EsjIA2dtnAAAAXwcCBAcS+AYA2f3uAOULBQAM9AcADQwSAAD//wAA//4AAP8DBAABAxgAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/f6oGAAEBXwD7+WcAAAEzAAICAAAB/QAiEhoA8u74AOT88wAMAgUAJvsMAAIEBQD//wIA8PfzzhEJD7kAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP9/qDIA/vxnAP8BXwABAQcAAQIAAP7/AAABAgABAgAAIwkWAPH14wDjDfEADPXnABMHEwC/5tb+5PTtomeii88AAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/f6oGAPz6XwD7+2cAAAEzAAEBAAD/AQAAAf8AAAECAAAB/wAA//8ADgcJABz1CwDR8+0A0wn/AOrp3gDM8+WsJTQvnwCiAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP9/ozIA+vdnAP//XwAAAQcAAAEAAAEBAAABAQAAAAEAAP//AAABAgAAAf8AAP//ABsMEwDE5uAA5wsBAPkVB+QjGyaeb29v8gAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/f6oGAPr1XwD3+mcA/wAzAAEBAAAAAQAAAQEAAP8BAAABAQAAAQEAAAEBAAD//wAAAQEA0+7iAMj66gDZCfkAGQoH3gIDApBxdna5AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP96njIA9fFnAP//XwAAAAcAAQEAAP8BAAABAQAA/wEAAAEAAAD/AQAAAQEAAAEBAPj9/AC8690A0gb1/PsbDwMYCxSuBAcHmXBwcLsAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/f6oG+vXtX/33+WcC//8zAAEBAAAAAQABAQEAAAABAAABAQAAAAAAAAEBAAAAAQAAAQEA1O/nAMj+7gDaDfz/HSMhjQEDA8QODg7HX19f7QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAANqRow7q5uuDDfr+ZwAAAAf/AAEAAQEBAAEBAQAA/wEAAAEBAAD/AAAAAQEAAP8BAPn9/AC87t8A0gn6AP4dEv8ZDQ2hDxERi19fX+0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA6HyZLc8QAlsU+gZuJeL1AAX/AQACAQEAAf8BAAEBAQABAAAAAQEBAAEAAQABAQAA1vDqAMoB8QDaEgAAGSAg5AECApYQEBCaX19f7QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAACzj5ZH9N/0hQzl/TPoFwsACvT6ABzr+QACAQEAAQABAAEBAQABAAEAAQEAAPr+/QDA7+IA1g3+AP8dFQAcDg+zAwQHmmpqZrQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAKGenkcK5PSABff6MxLn/ADxCQEA5RQHAAr0+wAP9v0AAgABAAEBAQABAAAA2vLsAM4D9ADfFwQAGSEh5gICApoPDw+aXV1d5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAoZ6eR//6+4AK8vg4/vz8AA32AgAU6PUA5CAPAOUTBQAI9vsABP4AAPz//gDE8OQA2xECAAEeFwAdDw61BAYGmGZmZrQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQDAwZE+vv6dA/w+DgN7/cA/P8AAP/+/wAU7PgA8wkDAOgXCwAH9AQA+d7mANMF9wDiGwcAGyMh7AMDA5oQEBCYWVlZ4wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT7+/loAP39OA7t9gAA+fwA/AEBAP4CAgAC//8AEuj1APAIAgDXEQEA7hwGAPgREQAdERC6BQUFmWVlZa4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT5+fghBAICAOj49ADo+O0A/QEAAP4BAAD9AQAA/fkBAPnuEwAIHBcAByAa8AgCA5cMDgyZXFxc4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT+/v4A/QEBAOweEAD7FwoAAQICAAICAgABAgEAAQEBAAICAwD/AwLABAUFmmZmZqcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT+/v4AAQEBAAQEBAAEBQUAAAAAAAAAAAAA/wAAAgMD9gMDA5kQEA+XW1tb2wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT9/f0AAQEBAAAAAAABAQEAAAAAAAUFBekEBATdAgICmmZmZqMBAQH+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/wAA//8AAAAAAQAAAAEAAQMD2wUFBW8QEBBbZ2dnoQEBAf4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQRFBS/BwcHyAIAAfABAQHt/QD+y19cXLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACbm5sX////Af///wEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIFBQ8EycnJDQEBAf8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////AcYA/ryFqBJ5AAAAAElFTkSuQmCC">
+                                                <img width="32px" class="rounded-circle" v-bind:title="item_colab.desc" v-if="item_colab.action == 3" src="data:image/png;base64,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">
+                                               
+                                          </template>
+                                                   </th>
+                                                   
+                                                
+                                                </tr>
+                                             </template>
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                   
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <!-- table -->
+                        <div class="container">
+                           <div class="row">
+                              <div class="col-md-4">
+                                 <div class="panel panel-default client-list">
+                                    <div class="panel-heading">
+                                       <h3 class="panel-title text-center">New Clients</h3>
+                                    </div>
+                                    <div class="panel-body ">
+                                       <table class="table">
+                                          <thead class='table-head'>
+                                             <tr class='table-head'>
+                                                <th>NEW CLIENT</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                             <tr>
+                                                <td>John</td>
+                                             </tr>
+                                             <tr>
+                                                <td>Mary</td>
+                                             </tr>
+                                             <tr>
+                                                <td>July</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div class="col-md-5">
+                                 <div class="panel panel-default ticket-list">
+                                    <div class="panel-heading">
+                                       <h3 class="panel-title text-center">Stuff Status</h3>
+                                    </div>
+                                    <div class="panel-body ">
+                                       <table class="table">
+                                          <thead class='table-head td'>
+                                             <tr>
+                                                <th>STUFF ID</th>
+                                                <th>TICKET ID</th>
+                                                <th>STATUS</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <template  v-for="person in stuff">
+                                                <tr>
+                                                   <th>{{person.STUFF_ID}}</th>
+                                                   <th>{{person.TICKET_ID}}</th>
+                                                   <th>{{person.STATUS}}</th>
+                                                </tr>
+                                             </template>
+                                          </tbody>
+                                       </table>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="container">
+                           <div class="row">
+                              <div class="col-md-9">
+                                 <div class="panel panel-default client-list">
+                                    <div class="panel-heading">
+                                       <h3 class="panel-title text-center">Statistics</h3>
+                                    </div>
+                                    <div class="panel-body ">
+                                       <table class="table">
+                                          <thead class='table-head'>
+                                             <tr class='table-head'>
+                                                <th>new client</th>
+                                             </tr>
+                                          </thead>
+                                    </div>
+                                    <tbody>
+                                    <template  v-for="person in stuff">
+                                    <tr>
+                                    <th>{{person.STUFF_ID}}</th>
+                                    <th>{{person.TICKET_ID}}</th>
+                                    <th>{{person.STATUS}}</th>
+                                    </tr>
+                                    </template>
+                                    </tbody>
+                                    </table>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+         </div>
       </div>
       <!-- /#page-wrapper -->
       </div>
@@ -83,7 +328,8 @@
       <script src="./bower_components/push.js/bin/push.min.js"></script>
       <script src="./bower_components/socket.io-client/dist/socket.io.js"></script>
 
-      <script src="./bower_components/vue/dist/vue.js"></script>
+      <!--<script src="./bower_components/vue/dist/vue.js"></script> -->
+      <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
       
       <script src="./push_notifier.js"></script>
 
@@ -98,10 +344,6 @@
             $('#men_link_dash').click(function(){ load_dashboard_view(); return false; });
             $('#men_link_prof').click(function(){ load_ticket_view(1);return false; });
            // $('#men_link_help').click(function(){ return false; });
-
-           if(loaded_view == "none"){
-                 load_dashboard_view();
-           }
         });
       </script>
 
