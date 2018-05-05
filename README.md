@@ -1,4 +1,4 @@
-# RWTH_HACK_201
+# RWTH_HACK_2018 (4-5.05.2018 Aachen)
 
 
 ![GitHub Logo](/documentation/icon_blue_trans.png)
@@ -9,16 +9,22 @@
 * Markus Hoehnerbach
 * Marcel Ochsendorf
 * Peerapon Wechsuwanmanee
-*
+* Weiling Xi
 
 ## THE CHALLANGE
 
-The have chosen the real-digital challange for the RWTH Hack 2018. The following 
-*
-*
+The have chosen the real-digital challange for the RWTH Hack 2018. The following problems are to solve:
+
+* Collaboration Ticket System
+* Show other users that the ticket 
 *
 
 
+
+## FEATURES
+
+* simple to use web interface
+* desktop notification for ticket events (status changes, )
 
 ## USED ARCHITECTURE
 
