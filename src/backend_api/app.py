@@ -117,7 +117,7 @@ def gen_mock_data(num_data):
         real_time_state = {}
         for num_realtime in range(random.randint(0, len(staffs))):
             staff_edit = random.choice(staffs)
-            real_time_state[staff_edit] = (created_at + (last_updated - created_at) * random.random()).strftime("%Y-%m-%d")
+            real_time_state[staff_edit] = {'editing': (created_at + (last_updated - created_at) * random.random()).strftime("%Y-%m-%d"), 'opened': (created_at + (last_updated - created_at) * random.random()).strftime("%Y-%m-%d")}
         users_looking = random.sample(real_time_state.keys(), random.randint(0, len(real_time_state)))
         total_looking = len(users_looking)
         users_editing = random.sample(users_looking, random.randint(0, total_looking))
@@ -286,6 +286,7 @@ def update_ticket(ticket_id):
     cur = db.execute('update tickets set title = ?, state = ?, created_at = ?, last_updated = ?, created_by = ?, tags = ? where id=?', [ticket['title'], ticket['state'], ticket['created_at'], ticket['last_updated'], ticket['created_by'], ticket['tags'], ticket_id])
     db.commit()
     return jsonify({'result': 'ok'})
+
 @app.route('/api/tickets/search/state/<string:state>/<string:sorting>')
 def filter_ticket_state(state, sorting):
     db = get_db()
@@ -295,6 +296,7 @@ def filter_ticket_state(state, sorting):
         cur = db.execute('select * from tickets where state=? order by created_at DESC', [state])
     tickets = list(map(dict, cur.fetchall()))
     return jsonify(tickets)
+
 @app.route('/api/tickets/search/created_older/<string:date>/<string:sorting>')
 def filter_ticket_created_older(date, sorting):
     db = get_db()
@@ -304,6 +306,7 @@ def filter_ticket_created_older(date, sorting):
         cur = db.execute('select * from tickets where created_at<=? order by created_at DESC', [date])
     tickets = list(map(dict, cur.fetchall()))
     return jsonify(tickets)
+
 @app.route('/api/tickets/search/created_newer/<string:date>/<string:sorting>')
 def filter_ticket_created_newer(date, sorting):
     db = get_db()
@@ -313,6 +316,7 @@ def filter_ticket_created_newer(date, sorting):
         cur = db.execute('select * from tickets where created_at>=? order by created_at DESC', [date])
     tickets = list(map(dict, cur.fetchall()))
     return jsonify(tickets)
+
 @app.route('/api/tickets/search/updated_older/<string:date>/<string:sorting>')
 def filter_ticket_updated_older(date, sorting):
     db = get_db()
@@ -322,6 +326,7 @@ def filter_ticket_updated_older(date, sorting):
         cur = db.execute('select * from tickets where last_updated<=? order by created_at DESC', [date])
     tickets = list(map(dict, cur.fetchall()))
     return jsonify(tickets)
+
 @app.route('/api/tickets/search/updated_newer/<string:date>/<string:sorting>')
 def filter_ticket_updated_newer(date, sorting):
     db = get_db()
@@ -331,6 +336,7 @@ def filter_ticket_updated_newer(date, sorting):
         cur = db.execute('select * from tickets where last_updated>=? order by created_at DESC', [date])
     tickets = list(map(dict, cur.fetchall()))
     return jsonify(tickets)
+
 @app.route('/api/tickets/search/tags/<string:tag>/<string:sorting>')
 def filter_ticket_tags(tag, sorting):
     db = get_db()
@@ -436,25 +442,40 @@ def user_connected():
     send(json.dumps({'msg': 'Hello!'}))
     pass
 
-TIMEOUT_SECONDS = 60
+TIMEOUT_SECONDS = 10
 
 def update_in_realtime_data(ticket):
     # remove users that have timed out
     # and returns remaining users    
-    print(ticket)
     data = json.loads(ticket['real_time_state'])
     curtime = datetime.datetime.now()    
     for user in list(data):
-        if (curtime - dateutil.parser.parse(data[user])).total_seconds() >= TIMEOUT_SECONDS:
+        for state in list(data[user]):
+            if (curtime - dateutil.parser.parse(data[user][state])).total_seconds() >= TIMEOUT_SECONDS:
+                del data[user][state]
+        if not data[user]:
             del data[user]
     return data
+
+@app.route('/api/cleanup')
+def cleanup():
+    db = get_db()
+    tickets = list(map(dict, db.execute('select * from tickets').fetchall()))
+    for ticket in tickets:
+        data = update_in_realtime_data(ticket)
+        new_state = json.dumps(data)
+        if ticket['real_time_state'] != new_state:
+            db.execute('update tickets set real_time_state = ? where id=?', [json.dumps(data), ticket['id']])
+    db.commit()
+    return jsonify({'result': 'ok'})
         
-def include_in_realtime_data(ticket, user):
+def include_in_realtime_data(ticket, user, state):
     # add the user with the current timestamp to the object
     db = get_db()
     ticket = dict(db.execute('select * from tickets where id=?', [ticket]).fetchone())
     data = update_in_realtime_data(ticket)
-    data[user] = datetime.datetime.now().isoformat()
+    data[user] = {} if user not in data else data[user]
+    data[user][state] = datetime.datetime.now().isoformat()
     db.execute('update tickets set real_time_state = ? where id=?', [json.dumps(data), ticket['id']])
     db.commit()
     return data
@@ -473,8 +494,8 @@ def remove_in_realtime_data(ticket, user):
 @socketio.on('ticket-opened')
 def ticket_opened(data):
     room = 'ticket:{}'.format(data['id'])
-    data = include_in_realtime_data(data['id'], data['user_name'])
-    send(data, room=room)
+    data = include_in_realtime_data(data['id'], data['user_name'], 'opened')
+    emit('ticket-opened', data, room=room)
     join_room(room)
 
 @socketio.on('ticket-closed')
@@ -487,12 +508,11 @@ def ticket_closed(data):
 @socketio.on('ticket-editing')
 def ticket_editing(data):
     room = 'ticket:{}'.format(data['id'])
-    data = include_in_realtime_data(data['id'], data['user_name'])
+    data = include_in_realtime_data(data['id'], data['user_name'], 'editing')
     send(data, room=room)
 
 @socketio.on('ticket-changed')
 def ticket_changed(data):
     print('Changed!!!')
     room = 'ticket:{}'.format(data['id'])
-    rt_data = include_in_realtime_data(data['id'], data['user_name'])
     emit('ticket-changed', json.dumps({'msg': 'Changed by: ' + data['user_name']}), room=room)
