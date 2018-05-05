@@ -8,7 +8,7 @@ function load_dashboard_view(){
 
 
 function load_ticket_view(_id){
-  alert("loading ticket");
+  alert("loading ticket " + _id);
 
   $.getJSON( "http://127.0.0.1:5000/api/tickets/"+_id+"/show", function( data ) {
 
@@ -58,6 +58,10 @@ if(data[i].state != undefined && data[i].state == "Progress"){
     }
     
 
+    data[i].link_id = "load_ticket_view(" + data[i].id + ")";
+    console.log(data[i].id);
+
+   // $('#'+ data[i].link_id).click(function(){ load_ticket_view(); return false; });
 
 
     data[i].collab_action = tmp;
@@ -93,7 +97,7 @@ var app = new Vue({
 
 
 update_recent_table();
-setInterval(function(){ update_recent_table(); }, 500);
+//setInterval(function(){ update_recent_table(); }, 500);
 
 
 

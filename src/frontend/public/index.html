@@ -129,8 +129,9 @@
                                           <tbody>
                                              <template  v-for="item in recent_ticket_tems">
                                                 <tr>
+                                                            
                                                    <th>
-                                                         {{item.id}}
+                                                            <a v-bind:onclick="item.link_id"  title="Click to open a ticket">      {{item.id}}</a> 
                                                       
 
 
@@ -163,6 +164,7 @@
                                           </template>
                                                    </th>
                                                    
+                                                
                                                 </tr>
                                              </template>
                                           </tbody>
