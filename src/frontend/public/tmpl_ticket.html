@@ -1,0 +1,167 @@
+<div class="container" >
+
+
+  {
+
+    query:"SELECT * FROM -...."
+  }
+
+  
+
+  
+    <div class="row">
+      <div class="col-md-12">
+        <h1>ID:{{ single_ticket.id }}: {{ single_ticket.title }}</h1>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">State</th>
+              <th scope="col">Created At</th>
+              <th scope="col">Last Updated</th>
+              <th scope="col">Real Time</th>
+              <th scope="col">Tags</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                  <span  v-if="single_ticket.state == 'Open'" class="badge badge-pill badge-secondary color-secondary-2-1bg">{{single_ticket.state}}</span>
+                  <span  v-if="single_ticket.state == 'Progress'" class="badge badge-pill badge-light color-secondary-2-5bg">{{single_ticket.state}}</span>
+                  <span  v-if="single_ticket.state == 'Done'" class="badge badge-pill badge-success color-secondary-1-1bg">{{single_ticket.state}}</span>
+                  <span  v-if="single_ticket.state == 'WaitClient'" class="badge badge-pill badge-light color-secondary-2-5bg">{{single_ticket.state}}</span>
+              </td>
+
+              <td>{{ single_ticket.created_at }}</td>
+              <td>{{ single_ticket.last_updated }}</td>
+              <td>{{ single_ticket.real_time_data}}</td>
+              <td>{{ single_ticket.tags }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row" v-for="interaction in single_ticket.interactions">
+      <div class="col-md-3" v-if="interaction.type=='ours'">
+        <div>
+          {{ interaction.date }}<br>
+          <i>From</i> <b>{{ interaction.sender }}</b><br>
+          <i>To</i> <b>{{ interaction.receiver }}</b><br>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <div class="p-4 mb-4 speech-bubble-right" v-bind:class="{'speech-bubble-right': interaction.type=='theirs', 'speech-bubble-left': interaction.type=='ours'}">
+          <pre>{{ interaction.content }}</pre>
+        </div>
+      </div>
+      <div class="col-md-3" v-if="interaction.type=='theirs'">
+        <div>
+          {{ interaction.date }}<br>
+          <i>From</i> {{ interaction.sender }}<br>
+          <i>To</i> {{ interaction.receiver }}<br>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 mb-4">
+        <form>
+           <div class="form-group">
+             <label for="exampleFormControlTextarea1">Your Answer</label>
+             <textarea class="form-control" id="exampleFormControlTextarea1" rows="15" onchange=" edit_throttle()" onkeyup=" edit_throttle()"></textarea>
+           </div>    
+          
+          <a href="#" class="btn btn-lg btn-primary btn-block" onclick="changed()">Submit</a>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+function throttle(func, wait) {
+    var timeout;
+    return function() {
+        var context = this, args = arguments;
+        if (!timeout) {
+            // the first time the event fires, we setup a timer, which 
+            // is used as a guard to block subsequent calls; once the 
+            // timer's handler fires, we reset it and create a new one
+            timeout = setTimeout(function() {
+                timeout = null;
+                func.apply(context, args);
+            }, wait);
+        }
+    }
+}
+
+
+
+let edit_throttle = throttle(function() {
+  socket.emit('ticket-editing', {id: app.single_ticket.id, user_name: fp});
+console.log("wq");
+}, 1000);
+
+
+
+var perm_notify = false;
+/*
+
+*/
+/*
+let app = new Vue({
+  el: '#tickets',
+  delimiters: ["${", "}"],
+  data: {
+    tickets: [],
+    single_ticket: {},
+    state: 'list',
+    single_interaction: ''
+  },
+  methods: {
+    show_ticket: function(k) {
+      app.single_ticket = this.tickets[k];
+      socket.emit('ticket-opened', {id: app.single_ticket.id, user_name: 'CSA'});
+      app.state = 'single';
+      $.get('/api/tickets/'+app.single_ticket.id+'/show', function(data) {
+        app.single_ticket = data;
+      });
+    },
+    show_list: function() {
+      socket.emit('ticket-closed', {id: app.single_ticket.id, user_name: 'CSA'});
+      app.single_ticket = {};
+      $.get('/api/tickets/list', function(data) {
+        app.tickets = data;
+        app.state = 'list';
+      });
+    },
+    editing: function() {
+      edit_throttle();
+    },
+    changed: function() {
+      socket.emit('ticket-changed', {id: app.single_ticket.id, user_name: 'CSA'});
+      $.ajax('/api/tickets/'+app.single_ticket.id+'/interactions/create', {
+          data : JSON.stringify({content: app.single_interaction, type: 'ours', sender: 'CSA', receiver: app.single_ticket.interactions[0].sender}),
+          contentType : 'application/json',
+          type : 'POST',
+          success: function() {
+            $.get('/api/tickets/'+app.single_ticket.id+'/show', function(data) {
+              app.single_ticket = data;
+              app.single_interaction = '';
+            });
+          }
+      });
+    }
+  }
+});
+
+*/
+</script>
+

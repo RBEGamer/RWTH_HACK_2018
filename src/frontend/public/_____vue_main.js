@@ -5,7 +5,7 @@ var refreshIntervalId = null;
 function load_dashboard_view(){
   loaded_view = "dashboard";
 
-  $.get( "http://127.0.0.1:5000/tmpl_dashboard.css", function( data ) {
+  $.get( "http://127.0.0.1:5000/tmpl_dashboard.html", function( data ) {
 
     if(data == undefined || data == null || data == ""){
       $('#single_page_view_area').html("<h1> CANT DISPLAY THE PAGE </h1>");
@@ -30,6 +30,7 @@ function load_dashboard_view(){
     });
     app.$forceUpdate();    
     update_recent_table();
+    create_chart();
     refreshIntervalId = setInterval(function(){ update_recent_table(); }, 500);
   });
 
@@ -44,7 +45,7 @@ function load_ticket_view(_id){
   console.log("loading ticket " + _id);
 
 
-  $.get( "http://127.0.0.1:5000/tmpl_ticket.css", function( data ) {
+  $.get( "http://127.0.0.1:5000/tmpl_ticket.html", function( data ) {
 
     if(data == undefined || data == null || data == ""){
       $('#single_page_view_area').html("<h1> CANT DISPLAY THE PAGE </h1>");
@@ -55,12 +56,28 @@ function load_ticket_view(_id){
 
 
 
+    $.getJSON( "http://127.0.0.1:5000/api/tickets/"+_id+"/show", function( data ) {
+if(data == undefined){console.log("data empty"); return;}
+
+app = new Vue({
+  el: '#app',
+  data:{
+    single_ticket:data
+  } 
+});
+app.$forceUpdate();  
+
+
+
   });
 
 
-  $.getJSON( "http://127.0.0.1:5000/api/tickets/"+_id+"/show", function( data ) {
+  
 
   });
+
+
+  
   //refresh view
 
 
@@ -143,8 +160,10 @@ update_recent_table();
 
 
 
-//setInterval(function(){ update_recent_table(); }, 500);
 
+
+
+//setInterval(function(){ update_recent_table(); }, 500);
 
 
 
