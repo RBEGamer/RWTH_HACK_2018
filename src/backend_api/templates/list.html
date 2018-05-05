@@ -12,7 +12,7 @@
   <div class="collapse navbar-collapse" id="navbarColor01">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
-        <a class="nav-link" href="#">Ticket List</a>
+        <a class="nav-link" href="/html/list.html">Ticket List</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="/html/user.html">Agent Administration</a>
@@ -29,6 +29,13 @@
     </form>
   </div>
 </nav>
+<div style="position: absolute; left: 0;">
+  <div class="row m-3">
+    <ul class="list-group">
+      <li class="list-group-item" style="width: 350px" v-for="act in activities"><i>${ act.name }</i> updated #${ act.id }: ${ act.title }</li>
+    </ul>
+  </div>
+</div>
 <div class="container pt-5">
   <div class="row" v-if="state == 'list'">
     <div class="col-md-12">
@@ -218,6 +225,13 @@ socket.on('ticket-changed', function(data) {
   }
 });
 
+socket.on('activity', function(data) {
+  console.log(data);
+  app.activities.unshift(data);
+  const MAX_ACTIVITY_LEN = 20;
+  app.activities.length = app.activities.length < MAX_ACTIVITY_LEN ? app.activities.length : MAX_ACTIVITY_LEN;
+});
+
 let app = new Vue({
   el: '#tickets',
   delimiters: ["${", "}"],
@@ -228,6 +242,7 @@ let app = new Vue({
     state: 'list',
     single_interaction: '',
     is_editing: false,
+    activities: [],
     edit_ticket: {
       title: '',
       tags: '',
@@ -258,6 +273,7 @@ let app = new Vue({
     changed: function() {
       i_did_that = true;
       socket.emit('ticket-changed', {id: app.single_ticket.id, user_name: user_name});
+      socket.emit('activity', {id: app.single_ticket.id, name: user_name, title: app.single_ticket.title});
       $.ajax('/api/tickets/'+app.single_ticket.id+'/interactions/create', {
           data : JSON.stringify({content: app.single_interaction, type: 'ours', sender: user_name, receiver: app.single_ticket.interactions[0].sender}),
           contentType : 'application/json',
@@ -297,6 +313,7 @@ let app = new Vue({
     submit_edit: function() {
       i_did_that = true;
       socket.emit('ticket-changed', {id: app.single_ticket.id, user_name: user_name});
+      socket.emit('activity', {id: app.single_ticket.id, name: user_name, title: app.single_ticket.title});
       $.ajax('/api/tickets/'+app.single_ticket.id+'/update', {
           data : JSON.stringify(app.edit_ticket),
           contentType : 'application/json',

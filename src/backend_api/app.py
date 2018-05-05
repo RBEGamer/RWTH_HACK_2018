@@ -511,6 +511,10 @@ def ticket_open(data):
     data = include_in_realtime_data(data['id'], data['user_name'], 'opened')
     send(data, room=room)
 
+@socketio.on('activity')
+def ticket_open(data):
+    emit('activity', data, broadcast=True)
+
 @socketio.on('ticket-closed')
 def ticket_closed(data):
     room = 'ticket:{}'.format(data['id'])
