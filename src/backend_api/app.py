@@ -275,10 +275,11 @@ def show_ticket(ticket_id):
     ticket['interactions'] = interactions
     return jsonify(ticket)
 
-@app.route('/api/tickets/search')
-def search_ticket(methods=['POST']):
+@app.route('/api/tickets/search', methods=['POST'])
+def search_ticket():
     db = get_db()
-    qry = request.json
+    arg = request.args
+    qry = arg['qry']
     cur = db.execute(qry)
     tickets = list(map(dict, cur.fetchall()))
     return jsonify(tickets)
