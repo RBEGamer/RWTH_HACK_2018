@@ -56,6 +56,7 @@ def json_serial(obj):
 
 # create our little application :)
 app = Flask(__name__)
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 socketio = SocketIO(app)
 bcrypt = Bcrypt(app)
 
@@ -216,9 +217,12 @@ def send_static_js(name):
 def send_static_css(name):
     return flask.send_from_directory('../frontend/public', name + '.css')
 
+
+
 @app.route('/bower_components/<path:path>')
 def send_static_bower(path):
     return flask.send_from_directory('../frontend/public/bower_components', path)
+
 
 @app.route('/')
 def show_spa():
@@ -230,6 +234,10 @@ def list_tickets():
     db = get_db()
     cur = db.execute('select * from tickets')
     tickets = list(map(dict, cur.fetchall()))
+    for ticket in tickets:
+        ticket['real_time_state'] = json.loads(ticket['real_time_state'])
+        ticket['users_looking'] = json.loads(ticket['users_looking'])
+        ticket['users_editing'] = json.loads(ticket['users_editing'])
     return jsonify(tickets)
 
 @app.route('/api/tickets/create', methods=['POST'])
@@ -246,6 +254,9 @@ def show_ticket(ticket_id):
     cur_ticket = db.execute('select * from tickets where id=?', [ticket_id])
     ticket = cur_ticket.fetchone()
     ticket = dict(ticket)
+    ticket['real_time_state'] = json.loads(ticket['real_time_state'])
+    ticket['users_looking'] = json.loads(ticket['users_looking'])
+    ticket['users_editing'] = json.loads(ticket['users_editing'])
     cur_interactions = db.execute('select * from interactions where ticket_id=? order by date ASC', [int(ticket_id)])
     interactions = cur_interactions.fetchall()
     interactions = list(map(dict, interactions))
@@ -320,7 +331,7 @@ def filter_ticket_tags(tag, sorting):
 def create_interaction(ticket_id):
     db = get_db()
     interaction = request.json
-    cur = db.execute('insert interactions (interaction_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', [interaction['interaction_id'], interaction['sender'], interaction['receiver'], interaction['date'], interaction['content'], interaction['type']])
+    cur = db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', [interaction['ticket_id'], interaction['sender'], interaction['receiver'], interaction['date'], interaction['content'], interaction['type']])
     db.commit()
     return jsonify({'result': 'ok', 'id': cur.lastrowid})
 
@@ -336,43 +347,57 @@ def list_interactions():
 def def_agent():
     db = get_db()
     agent = request.json
-    cur = db.execute('insert agents (is_admin, name, email, password) VALUES (?, ?, ?, ?)', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password'])])
+    cur = db.execute('insert into agents (is_admin, name, email, password) VALUES (?, ?, ?, ?)', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password'])])
+    db.commit()
     return jsonify({'result': 'ok', 'id': cur.lastrowid})
 
-@app.route('/api/agents/<int:agent_id>/update')
+@app.route('/api/agents/<int:agent_id>/update', methods=['POST'])
 def update_agent(agent_id):
     db = get_db()
     agent = request.json
-    if agent_id != agent.id:
+    if agent_id != agent['id']:
       return jsonify({'result': 'fail', 'error': 'Agent ID mismatch'})
     db.execute('update agents set is_admin = ?, name = ?, email = ?, password = ? where id = ?', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password']), agent_id])
+    db.commit()
     return jsonify({'result': 'ok'})
 
 @app.route('/api/agents/list')
 def list_agent():
     db = get_db()
-    cur = db.execute('select * from agents')
+    cur = db.execute('select name, email, is_admin, id from agents')
     agents = list(map(dict, cur.fetchall()))
     return jsonify(agents)
 
 @app.route('/api/login', methods=['POST'])
 def login_agent():
     db = get_db()
-    cur = db.execute('select * from agents where email=?', request.form['email'])
+    cur = db.execute('select * from agents where email=?', [request.form['email']])
     user = cur.fetchone()
     if user is None:
-        return jsonify({'result': 'fail'})
+        flask.flash('Login failed')
+        return redirect("/html/login.html", code=302)
     if bcrypt.check_password_hash(user['password'], request.form['password']):
         session['id'] = user['id']
         session['is_admin'] = user['is_admin']
-        return jsonify({'result': 'ok', 'is_admin': user['is_admin']})
-    return jsonify({'result': 'fail'})
+        session['name'] = user['name']
+        return redirect("/", code=302)
+    flask.flash('Login failed')
+    return redirect("/html/login.html", code=302)
 
 @app.route('/api/tickets/submit', methods=['POST'])
 def submit_ticket():
     db = get_db()
+    name = request.form['name'] + ' <' + request.form['email'] + '>'
+    the_time = datetime.datetime.now()
+    cur = db.execute(
+        'insert into tickets (title, state, created_at, last_updated, created_by, tags, real_time_state, total_users_looking) VALUES (?, ?, ?, ?, ?, ?, "{}", 0)', 
+        [request.form['title'], 'Open', the_time, the_time, name, ''])
+    db.commit()
+    ticket_id = cur.lastrowid
+    cur = db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', [ticket_id, name, 'System', the_time, request.form['content'], 'theirs'])
+    db.commit()
     # TODO What a User Sees
-    return jsonify({'result': 'fail'})
+    return '<h1 style="text-align: center">{}</h1>'.format('Thank you for contacting us. In future communications, please refer to the following reference number: #' + str(ticket_id))
 
 
 @app.route('/api/logout', methods=['POST'])
