@@ -30,6 +30,7 @@ The have chosen the real-digital challange for the RWTH Hack 2018. The following
 * Historical action tracking 
 * Advanced ticket filtering/sorting
 * Live nofication if an other user edit or review a ticket
+* Realtime status update system for ticket changes
 
 
 ## USED ARCHITECTURE
