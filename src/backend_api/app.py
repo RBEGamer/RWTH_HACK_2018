@@ -227,6 +227,7 @@ def send_static_css(name):
 def send_static_bower(path):
     return flask.send_from_directory('../frontend/public/bower_components', path)
 
+
 @app.route('/')
 def show_spa():
     if AUTH and 'name' not in session:
@@ -285,6 +286,60 @@ def update_ticket(ticket_id):
     cur = db.execute('update tickets set title = ?, state = ?, created_at = ?, last_updated = ?, created_by = ?, tags = ? where id=?', [ticket['title'], ticket['state'], ticket['created_at'], ticket['last_updated'], ticket['created_by'], ticket['tags'], ticket_id])
     db.commit()
     return jsonify({'result': 'ok'})
+@app.route('/api/tickets/search/state/<string:state>/<string:sorting>')
+def filter_ticket_state(state, sorting):
+    db = get_db()
+    if sorting == 'ASC':
+        cur = db.execute('select * from tickets where state=? order by created_at ASC', [state])
+    elif sorting == 'DESC':
+        cur = db.execute('select * from tickets where state=? order by created_at DESC', [state])
+    tickets = list(map(dict, cur.fetchall()))
+    return jsonify(tickets)
+@app.route('/api/tickets/search/created_older/<string:date>/<string:sorting>')
+def filter_ticket_created_older(date, sorting):
+    db = get_db()
+    if sorting == 'ASC':
+        cur = db.execute('select * from tickets where create_at<=? order by created_at ASC', [date])
+    elif sorting == 'DESC':
+        cur = db.execute('select * from tickets where created_at<=? order by created_at DESC', [date])
+    tickets = list(map(dict, cur.fetchall()))
+    return jsonify(tickets)
+@app.route('/api/tickets/search/created_newer/<string:date>/<string:sorting>')
+def filter_ticket_created_newer(date, sorting):
+    db = get_db()
+    if sorting == 'ASC':
+        cur = db.execute('select * from tickets where create_at>=? order by created_at ASC', [date])
+    elif sorting == 'DESC':
+        cur = db.execute('select * from tickets where created_at>=? order by created_at DESC', [date])
+    tickets = list(map(dict, cur.fetchall()))
+    return jsonify(tickets)
+@app.route('/api/tickets/search/updated_older/<string:date>/<string:sorting>')
+def filter_ticket_updated_older(date, sorting):
+    db = get_db()
+    if sorting == 'ASC':
+        cur = db.execute('select * from tickets where last_updated<=? order by created_at ASC', [date])
+    elif sorting == 'DESC':
+        cur = db.execute('select * from tickets where last_updated<=? order by created_at DESC', [date])
+    tickets = list(map(dict, cur.fetchall()))
+    return jsonify(tickets)
+@app.route('/api/tickets/search/updated_newer/<string:date>/<string:sorting>')
+def filter_ticket_updated_newer(date, sorting):
+    db = get_db()
+    if sorting == 'ASC':
+        cur = db.execute('select * from tickets where last_updated>=? order by created_at ASC', [date])
+    elif sorting == 'DESC':
+        cur = db.execute('select * from tickets where last_updated>=? order by created_at DESC', [date])
+    tickets = list(map(dict, cur.fetchall()))
+    return jsonify(tickets)
+@app.route('/api/tickets/search/tags/<string:tag>/<string:sorting>')
+def filter_ticket_tags(tag, sorting):
+    db = get_db()
+    if sorting == 'ASC':
+        cur = db.execute('select * from tickets where tag=? order by created_at ASC', [tag])
+    elif sorting == 'DESC':
+        cur = db.execute('select * from tickets where tag=? order by created_at DESC', [tag])
+    tickets = list(map(dict, cur.fetchall()))
+    return jsonify(tickets)
 
 @app.route('/api/tickets/<int:ticket_id>/interactions/create', methods=['POST'])
 def create_interaction(ticket_id):
