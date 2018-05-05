@@ -63,21 +63,8 @@
                </div>
                </div>
 
-               <select v-model="selected" >
-               <option disabled value="">Please select one</option>
-               <option>state</option>
-               <option>created_older</option>
-               <option>created_newer</option>
-               <option>updated_older</option>
-               <option>updated_newer</option>
-               <option>tag</option>
-               </select>
-               <input v-model="argument" placeholder="Filter">
-               <select v-model="sort" >
-               <option disabled value="">Please select one</option>
-               <option>ASC</option>
-               <option>DESC</option>
-               </select>
+               
+               
                
                <a v-bind:href="'javascript:sortcall()'">search</a>              
                </div>
