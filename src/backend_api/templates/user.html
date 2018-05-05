@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <div class="row" id="app">
+    <div class="col-md-12">
+      <h1 class="mb-4 text-center">Agent Administration</h1>
+      <form>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Name</label>
+          <input type="text" name="name" id="name" class="form-control" aria-describedby="emailHelp" placeholder="Enter your name" v-model="single_user.name">
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Email address</label>
+          <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email" v-model="single_user.email">
+        </div>
+        <div class="form-group">
+          <label for="exampleFormControlSelect1">Role</label>
+          <select class="form-control" id="exampleFormControlSelect1" v-model="single_user.is_admin">
+            <option value="0">Agent</option>
+            <option value="1">Admin</option>
+          </select>
+        </div>
+         <div class="form-group">
+           <label for="exampleFormControlTextarea1">Password</label>
+
+          <input type="password" class="form-control form-control-lg mb-3" id="password" placeholder="Password" required="" name="password" v-model="single_user.password" />
+         </div>    
+        
+        <a href="#" name="go" class="btn btn-lg btn-primary btn-block" @click="submit_new_user" v-if="state=='add'">Add User</a>
+        <a href="#" name="go" class="btn btn-lg btn-primary" v-if="state=='edit'" @click="submit_old_user">Edit User</a>
+        <a href="#" name="go" class="btn btn-lg btn-secondary" v-if="state=='edit'" @click="cancel_edit">Cancel</a>
+      </form>
+      <table class="table mt-5">
+        <thead>
+          <tr>
+            <th>E-Mail</th>
+            <th>Name</th>
+            <th>Admin</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(user, idx) in users">
+            <th>${ user.email }</th>
+            <td>${ user.name }</td>
+            <td>${ user.is_admin }</td>
+            <td><a href="#" @click="edit_user(idx)">Edit</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block bottom %}
+<script type="text/javascript">
+let empty_user = {
+  id: '',
+  name: '',
+  password: '',
+  email: '',
+  is_admin: 0
+};
+let app = new Vue({
+  el: '#app',
+  data: {
+    users: [],
+    single_user: Object.assign({}, empty_user),
+    state: 'add'
+  },
+  delimiters: ["${", "}"],
+  methods: {
+    edit_user: function(idx) {
+      app.single_user = Object.assign({}, this.users[idx]);
+      app.state = 'edit';
+    },
+    cancel_edit: function() {
+      app.single_user = Object.assign({}, empty_user);
+    },
+    submit_new_user: function() {
+      $.ajax('/api/agents/create', {
+          data : JSON.stringify(app.single_user),
+          contentType : 'application/json',
+          type : 'POST',
+          success: function() {
+            $.get('/api/agents/list', function(data) { app.users = data; });
+            app.state = 'add';
+          }
+      });
+    },
+    submit_old_user: function() {
+      $.ajax('/api/agents/'+app.single_user.id+'/update', {
+          data : JSON.stringify(app.single_user),
+          contentType : 'application/json',
+          type : 'POST',
+          success: function() {
+            $.get('/api/agents/list', function(data) { app.users = data; });
+            app.state = 'add';
+            app.single_user = Object.assign({}, empty_user);
+          }
+      });
+    }
+  }
+});
+$(function() {
+  $.get('/api/agents/list', function(data) { app.users = data; });
+});
+</script>
+{% endblock %}

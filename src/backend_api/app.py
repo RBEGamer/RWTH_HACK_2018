@@ -290,22 +290,24 @@ def list_interactions():
 def def_agent():
     db = get_db()
     agent = request.json
-    cur = db.execute('insert agents (is_admin, name, email, password) VALUES (?, ?, ?, ?)', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password'])])
+    cur = db.execute('insert into agents (is_admin, name, email, password) VALUES (?, ?, ?, ?)', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password'])])
+    db.commit()
     return jsonify({'result': 'ok', 'id': cur.lastrowid})
 
-@app.route('/api/agents/<int:agent_id>/update')
+@app.route('/api/agents/<int:agent_id>/update', methods=['POST'])
 def update_agent(agent_id):
     db = get_db()
     agent = request.json
-    if agent_id != agent.id:
+    if agent_id != agent['id']:
       return jsonify({'result': 'fail', 'error': 'Agent ID mismatch'})
     db.execute('update agents set is_admin = ?, name = ?, email = ?, password = ? where id = ?', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password']), agent_id])
+    db.commit()
     return jsonify({'result': 'ok'})
 
 @app.route('/api/agents/list')
 def list_agent():
     db = get_db()
-    cur = db.execute('select * from agents')
+    cur = db.execute('select name, email, is_admin, id from agents')
     agents = list(map(dict, cur.fetchall()))
     return jsonify(agents)
 
