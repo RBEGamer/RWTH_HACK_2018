@@ -231,6 +231,10 @@ def list_tickets():
     db = get_db()
     cur = db.execute('select * from tickets')
     tickets = list(map(dict, cur.fetchall()))
+    for ticket in tickets:
+        ticket['real_time_state'] = json.loads(ticket['real_time_state'])
+        ticket['users_looking'] = json.loads(ticket['users_looking'])
+        ticket['users_editing'] = json.loads(ticket['users_editing'])
     return jsonify(tickets)
 
 @app.route('/api/tickets/create', methods=['POST'])
@@ -247,6 +251,9 @@ def show_ticket(ticket_id):
     cur_ticket = db.execute('select * from tickets where id=?', [ticket_id])
     ticket = cur_ticket.fetchone()
     ticket = dict(ticket)
+    ticket['real_time_state'] = json.loads(ticket['real_time_state'])
+    ticket['users_looking'] = json.loads(ticket['users_looking'])
+    ticket['users_editing'] = json.loads(ticket['users_editing'])
     cur_interactions = db.execute('select * from interactions where ticket_id=? order by date ASC', [int(ticket_id)])
     interactions = cur_interactions.fetchall()
     interactions = list(map(dict, interactions))
