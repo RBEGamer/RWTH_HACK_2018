@@ -1,14 +1,62 @@
 
   // your code goes here
-
-
+var loaded_view = "none";
+var refreshIntervalId = null;
 function load_dashboard_view(){
-  alert("loading dash");
+  loaded_view = "dashboard";
+
+  $.get( "http://127.0.0.1:5000/tmpl_dashboard.css", function( data ) {
+
+    if(data == undefined || data == null || data == ""){
+      $('#single_page_view_area').html("<h1> CANT DISPLAY THE PAGE </h1>");
+      return;
+    }
+    $('#single_page_view_area').html(data);
+    app = new Vue({
+      el: '#app',
+      data: {
+        all_ticket_count: 1,
+        solved_ticket_count:2,
+        pending_ticket_count:3,
+        recent_ticket_tems: [
+          { id: '0',title: 'title1', created_by: 'IT', created_at: '01-04-2018', last_update: 'AAA', state: 'answered', tag: 'OPEN'},
+        
+        ],
+        stuff: [
+          { STUFF_ID: 'Stuff0',TICKET_ID: 'ticket#0', STATUS: 'OPEN'},
+          { STUFF_ID: 'Stuff1',TICKET_ID: 'ticket#1', STATUS: 'CLOSED'}
+        ]
+      }
+    });
+    app.$forceUpdate();    
+    update_recent_table();
+    refreshIntervalId = setInterval(function(){ update_recent_table(); }, 500);
+  });
+
+
+
 }
 
 
 function load_ticket_view(_id){
-  alert("loading ticket " + _id);
+  loaded_view = "ticket";
+  clearInterval(refreshIntervalId); //clear prev interval
+  console.log("loading ticket " + _id);
+
+
+  $.get( "http://127.0.0.1:5000/tmpl_ticket.css", function( data ) {
+
+    if(data == undefined || data == null || data == ""){
+      $('#single_page_view_area').html("<h1> CANT DISPLAY THE PAGE </h1>");
+      return;
+    }
+    $('#single_page_view_area').html(data);
+
+
+
+
+  });
+
 
   $.getJSON( "http://127.0.0.1:5000/api/tickets/"+_id+"/show", function( data ) {
 
@@ -20,6 +68,7 @@ function load_ticket_view(_id){
 
 
 function update_recent_table(){
+
   $.getJSON( "http://127.0.0.1:5000/api/tickets/list", function( data ) {
     if(data == null || data == undefined){console.log("data empty");return;}
     if(data.length <= 0){return;}
@@ -57,10 +106,8 @@ if(data[i].state != undefined && data[i].state == "Progress"){
       data[i].state_id = 2;
     }
     
-
+    //generate ticket id loading funtkion call
     data[i].link_id = "load_ticket_view(" + data[i].id + ")";
-    console.log(data[i].id);
-
    // $('#'+ data[i].link_id).click(function(){ load_ticket_view(); return false; });
 
 
@@ -73,7 +120,6 @@ if(data[i].state != undefined && data[i].state == "Progress"){
     app.pending_ticket_count = data.length - sv;
 });
 }
-
 
 
 
@@ -93,10 +139,10 @@ var app = new Vue({
     ]
   }
 });
-
-
-
 update_recent_table();
+
+
+
 //setInterval(function(){ update_recent_table(); }, 500);
 
 

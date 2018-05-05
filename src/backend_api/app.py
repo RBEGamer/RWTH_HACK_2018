@@ -217,9 +217,12 @@ def send_static_js(name):
 def send_static_css(name):
     return flask.send_from_directory('../frontend/public', name + '.css')
 
+
+
 @app.route('/bower_components/<path:path>')
 def send_static_bower(path):
     return flask.send_from_directory('../frontend/public/bower_components', path)
+
 
 @app.route('/')
 def show_spa():
