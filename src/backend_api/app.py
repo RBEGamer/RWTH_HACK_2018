@@ -9,6 +9,8 @@ from flask_bcrypt import Bcrypt
 import datetime 
 import dateutil.parser
 
+AUTH = False
+
 SQL_SCHEMA = '''
 drop table if exists tickets;
 create table tickets (
@@ -217,17 +219,25 @@ def send_static_js(name):
 def send_static_css(name):
     return flask.send_from_directory('../frontend/public', name + '.css')
 
+@app.route('/<name>.html')
+def send_static_css(name):
+    return flask.send_from_directory('../frontend/public', name + '.html')
+
 @app.route('/bower_components/<path:path>')
 def send_static_bower(path):
     return flask.send_from_directory('../frontend/public/bower_components', path)
 
 @app.route('/')
 def show_spa():
+    if AUTH and 'name' not in session:
+        return redirect('/html/login.html')
     return flask.send_from_directory('../frontend/public', 'index.html')
 
 # TODO: Allow sorting, filtering and pagination
 @app.route('/api/tickets/list')
 def list_tickets():
+    if AUTH and 'name' not in session:
+        return redirect('/html/login.html')
     db = get_db()
     cur = db.execute('select * from tickets')
     tickets = list(map(dict, cur.fetchall()))
@@ -239,6 +249,8 @@ def list_tickets():
 
 @app.route('/api/tickets/create', methods=['POST'])
 def create_ticket():
+    if AUTH and 'name' not in session:
+        return redirect('/html/login.html')
     db = get_db()
     ticket = request.json
     cur = db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags) VALUES (?, ?, ?, ?, ?, ?)', [ticket['title'], ticket['state'], ticket['created_at'], ticket['last_updated'], ticket['created_by'], ticket['tags']])
@@ -247,6 +259,8 @@ def create_ticket():
 
 @app.route('/api/tickets/<int:ticket_id>/show')
 def show_ticket(ticket_id):
+    if AUTH and 'name' not in session:
+        return redirect('/html/login.html')
     db = get_db()
     cur_ticket = db.execute('select * from tickets where id=?', [ticket_id])
     ticket = cur_ticket.fetchone()
@@ -262,6 +276,8 @@ def show_ticket(ticket_id):
 
 @app.route('/api/tickets/<int:ticket_id>/update', methods=['POST'])
 def update_ticket(ticket_id):
+    if AUTH and 'name' not in session:
+        return redirect('/html/login.html')
     db = get_db()
     ticket = request.json
     if ticket_id != ticket.id:
@@ -272,15 +288,19 @@ def update_ticket(ticket_id):
 
 @app.route('/api/tickets/<int:ticket_id>/interactions/create', methods=['POST'])
 def create_interaction(ticket_id):
+    if AUTH and 'name' not in session:
+        return redirect('/html/login.html')
     db = get_db()
     interaction = request.json
-    cur = db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', [interaction['ticket_id'], interaction['sender'], interaction['receiver'], interaction['date'], interaction['content'], interaction['type']])
+    cur = db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', [ticket_id, interaction['sender'], interaction['receiver'], datetime.datetime.now(), interaction['content'], interaction['type']])
     db.commit()
     return jsonify({'result': 'ok', 'id': cur.lastrowid})
 
 
 @app.route('/api/interactions/list')
 def list_interactions():
+    if AUTH and 'name' not in session:
+        return redirect('/html/login.html')
     db = get_db()
     cur = db.execute('select * from interactions')
     interaction = list(map(dict, cur.fetchall()))
@@ -288,6 +308,8 @@ def list_interactions():
 
 @app.route('/api/agents/create', methods=['POST'])
 def def_agent():
+    if AUTH and 'name' not in session and not session['is_admin']:
+        return redirect('/html/login.html')
     db = get_db()
     agent = request.json
     cur = db.execute('insert into agents (is_admin, name, email, password) VALUES (?, ?, ?, ?)', [agent['is_admin'], agent['name'], agent['email'], bcrypt.generate_password_hash(agent['password'])])
@@ -296,6 +318,8 @@ def def_agent():
 
 @app.route('/api/agents/<int:agent_id>/update', methods=['POST'])
 def update_agent(agent_id):
+    if AUTH and 'name' not in session and not session['is_admin']:
+        return redirect('/html/login.html')
     db = get_db()
     agent = request.json
     if agent_id != agent['id']:
@@ -306,6 +330,8 @@ def update_agent(agent_id):
 
 @app.route('/api/agents/list')
 def list_agent():
+    if AUTH and 'name' not in session and not session['is_admin']:
+        return redirect('/html/login.html')
     db = get_db()
     cur = db.execute('select name, email, is_admin, id from agents')
     agents = list(map(dict, cur.fetchall()))
@@ -373,10 +399,10 @@ def include_in_realtime_data(ticket, user):
     db = get_db()
     ticket = dict(db.execute('select * from tickets where id=?', [ticket]).fetchone())
     data = update_in_realtime_data(ticket)
-    data[user] = datetime.datetime.now()
-    print(data)
-    db.execute('update tickets set real_time_state = ? where id=?', [json.dumps(data, default=json_serial), ticket['id']])
+    data[user] = datetime.datetime.now().isoformat()
+    db.execute('update tickets set real_time_state = ? where id=?', [json.dumps(data), ticket['id']])
     db.commit()
+    return data
     
 def remove_in_realtime_data(ticket, user):
     # remove the user with the current timestamp to the object
@@ -387,30 +413,31 @@ def remove_in_realtime_data(ticket, user):
         del data[user]
     db.execute('update tickets set real_time_state = ? where id = ?', [json.dumps(data, default=json_serial), ticket['id']])
     db.commit()
+    return data
     
 @socketio.on('ticket-opened')
 def ticket_opened(data):
-    print(data)
     room = 'ticket:{}'.format(data['id'])
-    send(json.dumps({'msg': 'Opened by: ' + data['user_name']}), room=room)
-    include_in_realtime_data(data['id'], data['user_name'])
+    data = include_in_realtime_data(data['id'], data['user_name'])
+    send(data, room=room)
     join_room(room)
 
 @socketio.on('ticket-closed')
 def ticket_closed(data):
     room = 'ticket:{}'.format(data['id'])
-    remove_in_realtime_data(data['id'], data['user_name'])
+    data = remove_in_realtime_data(data['id'], data['user_name'])
     leave_room(room)
-    send(json.dumps({'msg': 'Closed by: ' + data['user_name']}), room=room)
+    send(data, room=room)
 
 @socketio.on('ticket-editing')
 def ticket_editing(data):
     room = 'ticket:{}'.format(data['id'])
-    include_in_realtime_data(data['id'], data['user_name'])
-    send(json.dumps({'msg': 'Editing by: ' + data['user_name']}), room=room)
+    data = include_in_realtime_data(data['id'], data['user_name'])
+    send(data, room=room)
 
 @socketio.on('ticket-changed')
 def ticket_changed(data):
+    print('Changed!!!')
     room = 'ticket:{}'.format(data['id'])
-    include_in_realtime_data(data['id'], data['user_name'])
-    send(json.dumps({'msg': 'Changed by: ' + data['user_name']}), room=room)
+    rt_data = include_in_realtime_data(data['id'], data['user_name'])
+    emit('ticket-changed', json.dumps({'msg': 'Changed by: ' + data['user_name']}), room=room)

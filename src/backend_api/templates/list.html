@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" id="tickets">
+  <div class="row" v-if="state == 'list'">
+    <div class="col-md-12">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Title</th>
+            <th scope="col">State</th>
+            <th scope="col">Created At</th>
+            <th scope="col">Last Updated</th>
+            <th scope="col">Real Time</th>
+            <th scope="col">Tags</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(ticket, k) in tickets" @click="show_ticket(k)">
+            <th scope="row">${ ticket.id }</th>
+            <td>${ ticket.title }</td>
+            <td>${ ticket.state }</td>
+            <td>${ ticket.created_at }</td>
+            <td>${ ticket.last_updated }</td>
+            <td>${ ticket.real_time_state }</td>
+            <td>${ ticket.tags }</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div v-if="state == 'single'">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="mb-3">
+          <a href="#" @click="show_list()">Back to list</a>
+        </div>
+        <h1>#${ single_ticket.id }: ${ single_ticket.title }</h1>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">State</th>
+              <th scope="col">Created At</th>
+              <th scope="col">Last Updated</th>
+              <th scope="col">Real Time</th>
+              <th scope="col">Tags</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${ single_ticket.state }</td>
+              <td>${ single_ticket.created_at }</td>
+              <td>${ single_ticket.last_updated }</td>
+              <td>${ single_ticket.real_time_data }</td>
+              <td>${ single_ticket.tags }</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row" v-for="interaction in single_ticket.interactions">
+      <div class="col-md-3" v-if="interaction.type=='ours'">
+        <div>
+          ${ interaction.date }<br>
+          <i>From</i> ${ interaction.sender }<br>
+          <i>To</i> ${ interaction.receiver }<br>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <div class="p-4 mb-4 speech-bubble-right" v-bind:class="{'speech-bubble-right': interaction.type=='theirs', 'speech-bubble-left': interaction.type=='ours'}">
+          <pre>${ interaction.content }</pre>
+        </div>
+      </div>
+      <div class="col-md-3" v-if="interaction.type=='theirs'">
+        <div>
+          ${ interaction.date }<br>
+          <i>From</i> ${ interaction.sender }<br>
+          <i>To</i> ${ interaction.receiver }<br>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 mb-4">
+        <form>
+           <div class="form-group">
+             <label for="exampleFormControlTextarea1">Your Answer</label>
+             <textarea class="form-control" id="exampleFormControlTextarea1" rows="15" @changed="editing()" @keyup="editing()" v-model="single_interaction"></textarea>
+           </div>    
+          
+          <a href="#" class="btn btn-lg btn-primary btn-block" @click="changed()">Submit</a>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block bottom %}
+<script type="text/javascript">
+function throttle(func, wait) {
+    var timeout;
+    return function() {
+        var context = this, args = arguments;
+        if (!timeout) {
+            // the first time the event fires, we setup a timer, which 
+            // is used as a guard to block subsequent calls; once the 
+            // timer's handler fires, we reset it and create a new one
+            timeout = setTimeout(function() {
+                timeout = null;
+                func.apply(context, args);
+            }, wait);
+        }
+    }
+}
+
+let socket = io();
+
+let edit_throttle = throttle(function() {
+  socket.emit('ticket-editing', {id: app.single_ticket.id, user_name: 'CSA'});
+}, 1000);
+
+socket.on('ticket-opened', function(data) {
+  
+});
+
+var perm_notify = false;
+
+socket.on('ticket-changed', function(data) {
+  if (app.state == 'single') {
+    $.get('/api/tickets/'+app.single_ticket.id+'/show', function(data) {
+      app.single_ticket = data;
+    });
+    if (perm_notify) {
+      var n = new Notification('Ticket has been modified.');
+      setTimeout(n.close.bind(n), 5000);  
+    }
+  }
+});
+
+let app = new Vue({
+  el: '#tickets',
+  delimiters: ["${", "}"],
+  data: {
+    tickets: [],
+    single_ticket: {},
+    state: 'list',
+    single_interaction: ''
+  },
+  methods: {
+    show_ticket: function(k) {
+      app.single_ticket = this.tickets[k];
+      socket.emit('ticket-opened', {id: app.single_ticket.id, user_name: 'CSA'});
+      app.state = 'single';
+      $.get('/api/tickets/'+app.single_ticket.id+'/show', function(data) {
+        app.single_ticket = data;
+      });
+    },
+    show_list: function() {
+      socket.emit('ticket-closed', {id: app.single_ticket.id, user_name: 'CSA'});
+      app.single_ticket = {};
+      $.get('/api/tickets/list', function(data) {
+        app.tickets = data;
+        app.state = 'list';
+      });
+    },
+    editing: function() {
+      edit_throttle();
+    },
+    changed: function() {
+      socket.emit('ticket-changed', {id: app.single_ticket.id, user_name: 'CSA'});
+      $.ajax('/api/tickets/'+app.single_ticket.id+'/interactions/create', {
+          data : JSON.stringify({content: app.single_interaction, type: 'ours', sender: 'CSA', receiver: app.single_ticket.interactions[0].sender}),
+          contentType : 'application/json',
+          type : 'POST',
+          success: function() {
+            $.get('/api/tickets/'+app.single_ticket.id+'/show', function(data) {
+              app.single_ticket = data;
+              app.single_interaction = '';
+            });
+          }
+      });
+    }
+  }
+});
+$(function() {
+  $.get('/api/tickets/list', function(data) {
+    app.tickets = data;
+  });
+  Notification.requestPermission(function(result) {
+    if (result == 'granted') perm_notify = true;
+  });
+});
+</script>
+{% endblock %}
