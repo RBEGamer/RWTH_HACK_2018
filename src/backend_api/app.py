@@ -275,6 +275,14 @@ def show_ticket(ticket_id):
     ticket['interactions'] = interactions
     return jsonify(ticket)
 
+@app.route('/api/tickets/search')
+def search_ticket():
+    db = get_db()
+    qry = request.json
+    cur = db.execute(qry)
+    tickets = list(map(dict, cur.fetchall()))
+    return jsonify(tickets)
+
 @app.route('/api/tickets/<int:ticket_id>/update', methods=['POST'])
 def update_ticket(ticket_id):
     if AUTH and 'name' not in session:
