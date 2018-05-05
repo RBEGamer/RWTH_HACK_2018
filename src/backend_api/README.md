@@ -27,3 +27,22 @@ To initialize the database:
     ticket-changed = when the user has edited something, call this event
 
 Clients receive events with fields msg, and send with id=`ticket_id` and `user_name` as their user name.
+
+
+# Filter in backends
+The current available filtering methods are by:
+	- state
+	- created_older
+	- created_newer
+	- updated_older
+	- updated_newer
+	- tag
+
+It can be called by:
+
+http://localhost:5000/api/tickets/search/[method]/[arg]/[sorting]
+
+where 	method is either of the methods above,
+		arg is state_name for state, date for [created_older, created_newer, updated_older, updated_newer]
+		sorting is either ASC or DESC for ascendent and descrntdent sorting respectively.
+		
