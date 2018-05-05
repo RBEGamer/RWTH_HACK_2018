@@ -33,3 +33,8 @@ Clients receive events with fields msg, and send with id=`ticket_id` and `user_n
 
 The backend is in `app.py', the main SPA is in `templates/list.html`.
 Other views (Contact, Agent Admin, Login) are also in that directory.
+
+# Mail Connectivity
+
+Set the `MAIL_PORT` environement variable to connect to a local open SMTP server.
+Requires `flask-mai;`.
