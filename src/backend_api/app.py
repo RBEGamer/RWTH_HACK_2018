@@ -91,14 +91,31 @@ def add_standard_agents():
 
 def add_mock_data():
     db = get_db()
-    list_mock, interaction_mock = gen_mock_data(7)
+    list_mock, interaction_mock = gen_mock_data(100)
     for l_mock in list_mock:
         cur = db.execute('insert into tickets (title, state, created_at, last_updated, created_by, tags, real_time_state, users_looking, total_users_looking, users_editing, total_users_editing) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', l_mock)
     for i_mock in interaction_mock:
         db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', i_mock)    
     db.commit()
-    
-    
+
+def generate_content(state, tag, inter_type):
+#    import pandas as pd
+#    df = pd.read_csv('responses.csv')
+    import random
+    with open('responses.csv' ,'r') as f:
+        lines = f.read()
+        lines = lines.rsplit('\n')
+        
+        replies = []
+        for line in lines:
+            words = line.rsplit(';')
+            if words != '':
+                if state == words[0] and (tag == words[1] or words[1] == 'all' or words[1] == 'etc') and inter_type == words[2]:
+                    replies.append(words[3])
+    if replies == []:
+        replies.append('Please wait')
+    return random.choice(replies)
+
 def gen_mock_data(num_data):
     '''
     This function create random mock database from a list of predefined data.
@@ -109,7 +126,7 @@ def gen_mock_data(num_data):
     states = ['Open', 'Progress', 'WaitClient', 'Done']
     staffs = ['Nikolas', 'Newton', 'Einstein', 'MickyMouse']
     clients = ['Sarah', 'Curie', 'MinnieMouse']
-    tags = ['IT', 'sales', 'return', 'order', 'tracking', 'etc']
+    tags = ['sales', 'return', 'order', 'tracking', 'etc']
     list_mock = []
     interaction_mock = []
     for ticket in range(num_data):
@@ -143,7 +160,7 @@ def gen_mock_data(num_data):
         if this_state == 'Open':
             num_inter = 1
         else:
-            num_inter = random.randint(1,5)
+            num_inter = random.randint(1,4)
         for i in range(num_inter):
             # define sender
             if i == 0: 
@@ -162,15 +179,15 @@ def gen_mock_data(num_data):
                 date = created_at
             else:
                 date = created_at + (last_updated - created_at) * random.random()
-            # define content
-            content = sender + ' is sending this message to ' + receiver 
+            
             # define interaction type
             if sender in staffs:
                 inter_type = 'ours'
             else:
                 inter_type = 'theirs'
-            
-            random.randint
+            # define content
+            content = sender + ' is sending this message to ' + receiver 
+#            content = generate_content(this_state, this_tag, inter_type)
             interaction_mock.append([ticket+1,
                                      sender, 
                                     receiver, 
@@ -284,8 +301,9 @@ def show_ticket(ticket_id):
 @app.route('/api/tickets/search', methods=['POST'])
 def search_ticket():
     db = get_db()
-    arg = request.args
-    qry = arg['qry']
+    qry = request.json
+#    qry = arg['qry']
+    print(type(qry))
     cur = db.execute(qry)
     tickets = list(map(dict, cur.fetchall()))
     return jsonify(tickets)
