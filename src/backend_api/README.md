@@ -38,3 +38,11 @@ Other views (Contact, Agent Admin, Login) are also in that directory.
 
 Set the `MAIL_PORT` environement variable to connect to a local open SMTP server.
 Requires `flask-mai;`.
+
+# `venv` setup
+
+The code requires Python 3.
+
+    python3 -m venv env
+    . env/bin/activate
+    pip install -r requirements.txt
