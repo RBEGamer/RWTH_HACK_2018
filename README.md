@@ -15,9 +15,9 @@
 
 The have chosen the real-digital challange for the RWTH Hack 2018. The following problems are to solve:
 
-* Collaboration Ticket System
-* Show other users that the ticket 
-*
+* Collaborative Ticket System
+* No time base ticket blocking
+
 
 
 
