@@ -24,7 +24,13 @@ The have chosen the real-digital challange for the RWTH Hack 2018. The following
 ## FEATURES
 
 * simple to use web interface
-* desktop notification for ticket events (status changes, )
+* desktop notification for ticket events (status changes, attention needed,...)
+* email notification for customers
+* Account/Login System
+* Historical action tracking 
+* Advanced ticket filtering/sorting
+* Live nofication if an other user edit or review a ticket
+
 
 ## USED ARCHITECTURE
 
