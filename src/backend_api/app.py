@@ -1,3 +1,4 @@
+import sys
 import os
 from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, \
@@ -59,6 +60,11 @@ def json_serial(obj):
 # create our little application :)
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+mail = None
+if 'MAIL_PORT' in os.environ:
+  from flask_mail import Mail, Message
+  app.config['MAIL_PORT'] = os.environ['MAIL_PORT']
+  mail = Mail(app)
 socketio = SocketIO(app)
 bcrypt = Bcrypt(app)
 
@@ -380,6 +386,18 @@ def create_interaction(ticket_id):
     interaction = request.json
     cur = db.execute('insert into interactions (ticket_id, sender, receiver, date, content, type) VALUES (?, ?, ?, ?, ?, ?)', [ticket_id, interaction['sender'], interaction['receiver'], datetime.datetime.now(), interaction['content'], interaction['type']])
     db.commit()
+    if mail:
+        cur_ticket = db.execute('select * from tickets where id=?', [ticket_id])
+        ticket = cur_ticket.fetchone()
+        ticket = dict(ticket)
+        recipient = ticket['created_by']
+        if '@' not in recipient:
+            recipient = '{} <customer@example.com>'.format(recipient)
+        msg = Message("Re: {} [#{}]".format(ticket['title'], ticket_id),
+                      sender="from@example.com",
+                      recipients=[recipient])
+        msg.body = interaction['content']
+        mail.send(msg)
     return jsonify({'result': 'ok', 'id': cur.lastrowid})
 
 
@@ -522,6 +540,16 @@ def ticket_opened(data):
     data = include_in_realtime_data(data['id'], data['user_name'], 'opened')
     emit('ticket-opened', data, room=room)
     join_room(room)
+
+@socketio.on('ticket-open')
+def ticket_open(data):
+    room = 'ticket:{}'.format(data['id'])
+    data = include_in_realtime_data(data['id'], data['user_name'], 'opened')
+    send(data, room=room)
+
+@socketio.on('activity')
+def ticket_open(data):
+    emit('activity', data, broadcast=True)
 
 @socketio.on('ticket-closed')
 def ticket_closed(data):

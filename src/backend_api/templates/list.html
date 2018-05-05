@@ -12,7 +12,7 @@
   <div class="collapse navbar-collapse" id="navbarColor01">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
-        <a class="nav-link" href="#">Ticket List</a>
+        <a class="nav-link" href="/html/list.html">Ticket List</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="/html/user.html">Agent Administration</a>
@@ -29,7 +29,34 @@
     </form>
   </div>
 </nav>
+<div style="position: absolute; left: 0;">
+  <div class="row m-3">
+    <ul class="list-group">
+      <li class="list-group-item" style="width: 350px" v-for="act in activities"><i>${ act.name }</i> updated #${ act.id }: ${ act.title }</li>
+    </ul>
+  </div>
+</div>
 <div class="container pt-5">
+  <div class="row mb-5" v-if="state == 'list'">
+    <div class="col-md-12 form-inline">
+      <div class="btn-group mr-4">
+        <button type="button" class="btn btn-info" v-bind:class="{'font-weight-bold': select_state=='all'}" @click="select_state='all'">All</button>
+        <button type="button" class="btn btn-secondary"  v-bind:class="{'font-weight-bold': select_state=='Open'}"@click="select_state='Open'">Open</button>
+        <button type="button" class="btn btn-success" v-bind:class="{'font-weight-bold': select_state=='Done'}" @click="select_state='Done'">Done</button>
+        <button type="button" class="btn btn-primary" v-bind:class="{'font-weight-bold': select_state=='Progress'}" @click="select_state='Progress'">Progress</button>
+        <button type="button" class="btn btn-secondary" v-bind:class="{'font-weight-bold': select_state=='WaitClient'}" @click="select_state='WaitClient'">WaitClient</button>
+      </div>
+      <div class="btn-group mr-2">
+        <button type="button" class="btn btn-primary" v-bind:class="{'font-weight-bold': select_order=='new'}" @click="select_order='new'">Newest First</button>
+        <button type="button" class="btn btn-secondary" v-bind:class="{'font-weight-bold': select_order=='old'}" @click="select_order='old'">Oldest First</button>
+      </div>
+      <div class="btn-group mr-4">
+        <button type="button" class="btn btn-primary" class="btn btn-secondary" v-bind:class="{'font-weight-bold': select_order_by=='update'}" @click="select_order_by='update'">By Last Update</button>
+        <button type="button" class="btn btn-secondary" class="btn btn-secondary" v-bind:class="{'font-weight-bold': select_order_by=='create'}" @click="select_order_by='create'">By Creation</button>
+      </div>
+      <input type="text" class="form-control" v-model='select_search'>
+    </div>
+  </div>
   <div class="row" v-if="state == 'list'">
     <div class="col-md-12">
       <table class="table">
@@ -138,7 +165,7 @@
           <pre>${ interaction.content }</pre>
         </div>
       </div>
-      <div class="col-md-3" v-if="interaction.type=='theirs'">
+      <div class="col-md-3 text-right" v-if="interaction.type=='theirs'">
         <div>
           ${ interaction.date }<br>
           <i>From</i> ${ interaction.sender }<br>
@@ -190,12 +217,12 @@ let edit_throttle = throttle(function() {
 }, 1000);
 
 socket.on('ticket-opened', function(data) {
-  if (perm_notify && i_did_that) {
+  console.log(data);
+  if (perm_notify) {
     var n = new Notification('Ticket opened by someone else.');
     setTimeout(n.close.bind(n), 5000);  
   }
   app.single_ticket.real_time_state = data;
-  i_did_that = false;
 });
 
 socket.on('message', function(data) {
@@ -210,7 +237,7 @@ socket.on('ticket-changed', function(data) {
     $.get('/api/tickets/'+app.single_ticket.id+'/show', function(data) {
       app.single_ticket = data;
     });
-    if (perm_notify && i_did_that) {
+    if (perm_notify && ! i_did_that) {
       var n = new Notification('Ticket has been modified.');
       setTimeout(n.close.bind(n), 5000);  
     }
@@ -218,16 +245,28 @@ socket.on('ticket-changed', function(data) {
   }
 });
 
+socket.on('activity', function(data) {
+  console.log(data);
+  app.activities.unshift(data);
+  const MAX_ACTIVITY_LEN = 20;
+  app.activities.length = app.activities.length < MAX_ACTIVITY_LEN ? app.activities.length : MAX_ACTIVITY_LEN;
+});
+
 let app = new Vue({
   el: '#tickets',
   delimiters: ["${", "}"],
   data: {
     user_name: user_name,
-    tickets: [],
+    tickets_raw: [],
+    select_state: 'all',
+    select_order: 'new',
+    select_order_by: 'create',
+    select_search: '',
     single_ticket: { real_time_state: {} },
     state: 'list',
     single_interaction: '',
     is_editing: false,
+    activities: [],
     edit_ticket: {
       title: '',
       tags: '',
@@ -238,7 +277,6 @@ let app = new Vue({
   methods: {
     show_ticket: function(k) {
       app.single_ticket = this.tickets[k];
-      i_did_that = true;
       socket.emit('ticket-opened', {id: app.single_ticket.id, user_name: user_name});
       app.state = 'single';
       $.get('/api/tickets/'+app.single_ticket.id+'/show', function(data) {
@@ -247,9 +285,9 @@ let app = new Vue({
     },
     show_list: function() {
       socket.emit('ticket-closed', {id: app.single_ticket.id, user_name: user_name});
-      app.single_ticket = {};
+      app.single_ticket = { real_time_state: {} };
       $.get('/api/tickets/list', function(data) {
-        app.tickets = data;
+        app.tickets_raw = data;
         app.state = 'list';
       });
     },
@@ -259,6 +297,7 @@ let app = new Vue({
     changed: function() {
       i_did_that = true;
       socket.emit('ticket-changed', {id: app.single_ticket.id, user_name: user_name});
+      socket.emit('activity', {id: app.single_ticket.id, name: user_name, title: app.single_ticket.title});
       $.ajax('/api/tickets/'+app.single_ticket.id+'/interactions/create', {
           data : JSON.stringify({content: app.single_interaction, type: 'ours', sender: user_name, receiver: app.single_ticket.interactions[0].sender}),
           contentType : 'application/json',
@@ -298,6 +337,7 @@ let app = new Vue({
     submit_edit: function() {
       i_did_that = true;
       socket.emit('ticket-changed', {id: app.single_ticket.id, user_name: user_name});
+      socket.emit('activity', {id: app.single_ticket.id, name: user_name, title: app.single_ticket.title});
       $.ajax('/api/tickets/'+app.single_ticket.id+'/update', {
           data : JSON.stringify(app.edit_ticket),
           contentType : 'application/json',
@@ -321,12 +361,37 @@ let app = new Vue({
     },
     single_ticket_opened: function() {
       return this.get_opened(this.single_ticket);
+    },
+    tickets: function() {
+      let result = this.tickets_raw.filter(function(ticket) {
+        return app.select_state == 'all' || ticket['state'] == app.select_state;
+      }).filter(function(ticket) {
+        if (app.select_search == '') return true;
+        let keys = app.select_search.split(' ');
+        for (let i = 0; i < keys.length; i++) {
+          let key = keys[i];
+          let match = false;
+          if (ticket['created_by'].indexOf(key) != -1) match = true;
+          if (ticket['tags'].indexOf(key) != -1) match = true;
+          if (ticket['title'].indexOf(key) != -1) match = true;
+          if (! match) return false;
+        }
+        return true;
+      });
+      result.sort(function(a, b) {
+        let key = app.select_order_by == 'create' ? 'created_at' : 'last_updated';
+        let dir = app.select_order == 'new' ? -1 : 1;
+        if (a[key] > b[key]) return dir;
+        if (a[key] < b[key]) return -dir;
+        return 0;
+      });
+      return result;
     }
   }
 });
 $(function() {
   $.get('/api/tickets/list', function(data) {
-    app.tickets = data;
+    app.tickets_raw = data;
   });
   Notification.requestPermission(function(result) {
     if (result == 'granted') perm_notify = true;
@@ -336,14 +401,14 @@ $(function() {
       if (app.single_interaction != '' || app.is_editing) {
         socket.emit('ticket-editing', {id: app.single_ticket.id, user_name: user_name});
       } else {
-        socket.emit('ticket-opened', {id: app.single_ticket.id, user_name: user_name});
+        socket.emit('ticket-open', {id: app.single_ticket.id, user_name: user_name});
       }
     }
   }, 1000);
   setInterval(function() {
     if (app.state == 'list') {
       $.get('/api/tickets/list', function(data) {
-        app.tickets = data;
+        app.tickets_raw = data;
       });
     }
   }, 5000);

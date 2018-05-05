@@ -7,11 +7,11 @@
 
 /* As hex codes */
 
-.color-primary-0 { color: #1C225A }	/* Main Primary color */
-.color-primary-1 { color: #565C93 }
-.color-primary-2 { color: #333A75 }
-.color-primary-3 { color: #0B103E }
-.color-primary-4 { color: #030725 }
+.color-primary-0 { color: rgb(238, 0, 0) }	/* Main Primary color */
+.color-primary-1 { color: rgb(88, 147, 86) }
+.color-primary-2 { color: rgb(37, 187, 0) }
+.color-primary-3 { color: rgb(62, 27, 11) }
+.color-primary-4 { color: #ec2300 }
 
 .color-secondary-1-0 { color: #4F7718 }	/* Main Secondary color (1) */
 .color-secondary-1-1 { color: #9CC366 }
@@ -26,7 +26,7 @@
 .color-secondary-2-4 { color: #30000E }
 
 .color-primary-0bg { background: #1C225A }	/* Main Primary color */
-.color-primary-1bg { background: #565C93 }
+.color-primary-1bg { background: rgba(189, 190, 192, 0.575) }
 .color-primary-2bg { background: #333A75 }
 .color-primary-3bg { background: #0B103E }
 .color-primary-4bg { background: #030725 }
