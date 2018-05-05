@@ -37,6 +37,26 @@
   </div>
 </div>
 <div class="container pt-5">
+  <div class="row mb-5" v-if="state == 'list'">
+    <div class="col-md-12 form-inline">
+      <div class="btn-group mr-4">
+        <button type="button" class="btn btn-info" v-bind:class="{'font-weight-bold': select_state=='all'}" @click="select_state='all'">All</button>
+        <button type="button" class="btn btn-secondary"  v-bind:class="{'font-weight-bold': select_state=='Open'}"@click="select_state='Open'">Open</button>
+        <button type="button" class="btn btn-success" v-bind:class="{'font-weight-bold': select_state=='Done'}" @click="select_state='Done'">Done</button>
+        <button type="button" class="btn btn-primary" v-bind:class="{'font-weight-bold': select_state=='Progress'}" @click="select_state='Progress'">Progress</button>
+        <button type="button" class="btn btn-secondary" v-bind:class="{'font-weight-bold': select_state=='WaitClient'}" @click="select_state='WaitClient'">WaitClient</button>
+      </div>
+      <div class="btn-group mr-2">
+        <button type="button" class="btn btn-primary" v-bind:class="{'font-weight-bold': select_order=='new'}" @click="select_order='new'">Newest First</button>
+        <button type="button" class="btn btn-secondary" v-bind:class="{'font-weight-bold': select_order=='old'}" @click="select_order='old'">Oldest First</button>
+      </div>
+      <div class="btn-group mr-4">
+        <button type="button" class="btn btn-primary" class="btn btn-secondary" v-bind:class="{'font-weight-bold': select_order_by=='update'}" @click="select_order_by='update'">By Last Update</button>
+        <button type="button" class="btn btn-secondary" class="btn btn-secondary" v-bind:class="{'font-weight-bold': select_order_by=='create'}" @click="select_order_by='create'">By Creation</button>
+      </div>
+      <input type="text" class="form-control" v-model='select_search'>
+    </div>
+  </div>
   <div class="row" v-if="state == 'list'">
     <div class="col-md-12">
       <table class="table">
@@ -237,7 +257,11 @@ let app = new Vue({
   delimiters: ["${", "}"],
   data: {
     user_name: user_name,
-    tickets: [],
+    tickets_raw: [],
+    select_state: 'all',
+    select_order: 'new',
+    select_order_by: 'create',
+    select_search: '',
     single_ticket: { real_time_state: {} },
     state: 'list',
     single_interaction: '',
@@ -263,7 +287,7 @@ let app = new Vue({
       socket.emit('ticket-closed', {id: app.single_ticket.id, user_name: user_name});
       app.single_ticket = { real_time_state: {} };
       $.get('/api/tickets/list', function(data) {
-        app.tickets = data;
+        app.tickets_raw = data;
         app.state = 'list';
       });
     },
@@ -337,12 +361,37 @@ let app = new Vue({
     },
     single_ticket_opened: function() {
       return this.get_opened(this.single_ticket);
+    },
+    tickets: function() {
+      let result = this.tickets_raw.filter(function(ticket) {
+        return app.select_state == 'all' || ticket['state'] == app.select_state;
+      }).filter(function(ticket) {
+        if (app.select_search == '') return true;
+        let keys = app.select_search.split(' ');
+        for (let i = 0; i < keys.length; i++) {
+          let key = keys[i];
+          let match = false;
+          if (ticket['created_by'].indexOf(key) != -1) match = true;
+          if (ticket['tags'].indexOf(key) != -1) match = true;
+          if (ticket['title'].indexOf(key) != -1) match = true;
+          if (! match) return false;
+        }
+        return true;
+      });
+      result.sort(function(a, b) {
+        let key = app.select_order_by == 'create' ? 'created_at' : 'last_updated';
+        let dir = app.select_order == 'new' ? -1 : 1;
+        if (a[key] > b[key]) return dir;
+        if (a[key] < b[key]) return -dir;
+        return 0;
+      });
+      return result;
     }
   }
 });
 $(function() {
   $.get('/api/tickets/list', function(data) {
-    app.tickets = data;
+    app.tickets_raw = data;
   });
   Notification.requestPermission(function(result) {
     if (result == 'granted') perm_notify = true;
@@ -359,7 +408,7 @@ $(function() {
   setInterval(function() {
     if (app.state == 'list') {
       $.get('/api/tickets/list', function(data) {
-        app.tickets = data;
+        app.tickets_raw = data;
       });
     }
   }, 5000);
