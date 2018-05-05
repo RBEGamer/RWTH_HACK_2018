@@ -463,7 +463,7 @@ def submit_ticket():
     name = request.form['name'] + ' <' + request.form['email'] + '>'
     the_time = datetime.datetime.now()
     cur = db.execute(
-        'insert into tickets (title, state, created_at, last_updated, created_by, tags, real_time_state, total_users_looking) VALUES (?, ?, ?, ?, ?, ?, "{}", 0)', 
+        'insert into tickets (title, state, created_at, last_updated, created_by, tags, real_time_state, total_users_looking, total_users_editing, users_editing, users_looking) VALUES (?, ?, ?, ?, ?, ?, "{}", 0, 0, "[]", "[]")', 
         [request.form['title'], 'Open', the_time, the_time, name, ''])
     db.commit()
     ticket_id = cur.lastrowid
