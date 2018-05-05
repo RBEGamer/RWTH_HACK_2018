@@ -24,7 +24,7 @@ for (var j = 0; j < data[i].total_users_looking; j++) {
   console.log(data[i].users_looking[j]);
 }
 for (var j = 0; j < data[i].total_users_editing; j++) { 
-  tmp.push({action:1,desc:data[i].users_editing[j].toString()});
+  tmp.push({action:2,desc:data[i].users_editing[j].toString()});
 }    
 
 
