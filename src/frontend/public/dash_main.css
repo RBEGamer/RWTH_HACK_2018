@@ -82,7 +82,7 @@
         border-radius: 0;
         border-top: 1px rgba(0,0,0,.5) solid;
         overflow-y: auto;
-        background-color: #1C225A;
+        background-color: rgb(214, 214, 214);
         bottom: 0;
         overflow-x: hidden;
         padding-bottom: 40px;
@@ -90,19 +90,19 @@
 
     .side-nav>li>a {
         width: 225px;
-        border-bottom: 1px rgba(0,0,0,.3) solid;
+        border-bottom: 1px rgba(255, 0, 0, 0.3) solid;
     }
 
     .side-nav li a:hover,
     .side-nav li a:focus {
         outline: none;
-        background-color: #1a242f !important;
+        background-color: #007bff !important;
     }
 }
 
 .side-nav>li>ul {
     padding: 0;
-    border-bottom: 1px rgba(0,0,0,.3) solid;
+    border-bottom: 1px rgba(109, 109, 109, 0.3) solid;
 }
 
 .side-nav>li>ul>li>a {
@@ -110,11 +110,11 @@
     padding: 10px 15px 10px 38px;
     text-decoration: none;
     /*color: #999;*/
-    color: #fff;    
+    color: rgb(107, 107, 107);    
 }
 
 .side-nav>li>ul>li>a:hover {
-    color: #fff;
+    color: rgb(105, 105, 105);
 }
 
 .navbar .nav > li > a > .label {
@@ -156,9 +156,9 @@
 
 .ticket-list .table-head{
   border: none;  
-  background: #FFA500;
+  background: rgb(255, 255, 255);
   padding: 30px;
-  color: #fff;
+  color: rgb(37, 37, 37);
   overflow-x: auto
 }
 
