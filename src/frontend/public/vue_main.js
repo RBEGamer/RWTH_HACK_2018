@@ -1,6 +1,24 @@
 
   // your code goes here
 
+
+function load_dashboard_view(){
+  alert("loading dash");
+}
+
+
+function load_ticket_view(_id){
+  alert("loading ticket");
+
+  $.getJSON( "http://127.0.0.1:5000/api/tickets/"+_id+"/show", function( data ) {
+
+  });
+  //refresh view
+
+
+}
+
+
 function update_recent_table(){
   $.getJSON( "http://127.0.0.1:5000/api/tickets/list", function( data ) {
     if(data == null || data == undefined){console.log("data empty");return;}
@@ -21,7 +39,7 @@ var tmp = [];
 
 for (var j = 0; j < data[i].total_users_looking; j++) {
   tmp.push({action:1,desc:data[i].users_looking[j].toString()});
-  console.log(data[i].users_looking[j]);
+
 }
 for (var j = 0; j < data[i].total_users_editing; j++) { 
   tmp.push({action:2,desc:data[i].users_editing[j].toString()});

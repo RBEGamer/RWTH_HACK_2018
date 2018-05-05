@@ -47,13 +47,13 @@
                   
                   
                   <li>
-                     <a href="investigaciones/favoritas"><i class="fa fa-fw fa-user-plus"></i>  Dashboard</a>
+                     <a id="men_link_dash" href="#"><i class="fa fa-fw fa-user-plus"></i>  Dashboard</a>
                   </li>
                   <li>
-                     <a href="sugerencias"><i class="fa fa-fw fa-paper-plane-o"></i> Profile</a>
+                     <a id="men_link_prof" href="#"><i class="fa fa-fw fa-paper-plane-o"></i> Profile</a>
                   </li>
                   <li>
-                     <a href="faq"><i class="fa fa-fw fa fa-question-circle"></i> System-Help</a>
+                     <a id="men_link_help" href="#"><i class="fa fa-fw fa fa-question-circle"></i> System-Help</a>
                   </li>
                </ul>
             </div>
@@ -284,6 +284,22 @@
       <script src="./bower_components/vue/dist/vue.js"></script>
       
       <script src="./push_notifier.js"></script>
+
+
+
+
+      
+
+    
+<script>
+      $(function() {
+            $('#men_link_dash').click(function(){ load_dashboard_view(); return false; });
+            $('#men_link_prof').click(function(){ load_ticket_view(1);return false; });
+           // $('#men_link_help').click(function(){ return false; });
+        });
+      </script>
+
+
    </body>
 </html>
 
