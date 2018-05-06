@@ -16,7 +16,7 @@
 The have chosen the real-digital challange for the RWTH Hack 2018. The following problems are to solve:
 
 * Collaborative Ticket System
-* No time base ticket blocking
+* No time based ticket blocking
 
 
 
@@ -35,9 +35,9 @@ The have chosen the real-digital challange for the RWTH Hack 2018. The following
 
 ## USED ARCHITECTURE
 
-* BACKEND: Python + Flash(Webserver)
-* DATABASE: SQL-LITE (embedden in directly in the Backend)
-* FRONTEND: Bootstrap 4.0 and Vuejs as templating engine
+* BACKEND: Python + Flask
+* DATABASE: SQLITE (embedden in directly in the Backend)
+* FRONTEND: Bootstrap 4.0 and Vuejs
 
 ## SCREENSHOTS (FINAL RESULT)
 
